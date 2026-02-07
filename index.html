@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>360° Canlı Görüşme Portalı</title>
+    <title>360° Görüşme ve Randevu Takip Portalı</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -39,114 +41,142 @@
             padding: 10px !important;
             border-radius: 8px !important;
             width: 100% !important;
+            font-size: 13px !important;
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
-        
-        .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 350px; }
+        .custom-input:focus {
+            border-color: #6366f1 !important;
+            outline: none;
+        }
 
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 350px; }
         #status-indicator { position: fixed; top: 20px; right: 20px; z-index: 1000; }
         
         @keyframes pulse-custom { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .sync-pulse { animation: pulse-custom 2s infinite; }
         
-        #error-log { display: none; background: #450a0a; color: #fecaca; padding: 1rem; margin: 1rem; border-radius: 0.75rem; border: 1px solid #ef4444; font-size: 0.75rem; text-align: left; }
+        .tab-btn { padding: 10px; font-weight: 700; font-size: 12px; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn.active { background: #6366f1; color: white; }
+        .tab-btn.inactive { background: #1e293b; color: #64748b; }
     </style>
-
-    <!-- Chosen Palette: Midnight Blue (Slate 900 base, Indigo 500 accents) -->
-    <!-- Application Structure Plan: 
-         - Logic: Robust Firebase integration with explicit permission handling.
-         - Path Strategy: Strictly follows /artifacts/{appId}/public/data/{collectionName}.
-         - Error Handling: Detailed logging to help user solve Firestore Rules issues.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="min-h-screen antialiased text-left">
 
-    <!-- Hata Kayıt Alanı -->
-    <div id="error-log"></div>
-
-    <!-- Bağlantı Durumu Göstergesi -->
+    <!-- Bağlantı Durumu -->
     <div id="status-indicator">
         <div id="status-chip" class="bg-slate-800 text-slate-500 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-slate-700">
             Bağlantı Kuruluyor...
         </div>
     </div>
 
-    <!-- Veri Düzenleme Paneli -->
-    <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-700 p-6 admin-sidebar translate-x-full">
+    <!-- Veri Düzenleme Paneli (Sidebar) -->
+    <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 bg-slate-900 border-l border-slate-700 p-6 admin-sidebar translate-x-full overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold flex items-center text-white m-0">⚙️ Yönet</h2>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">⚙️ Yönetim</h2>
             <button onclick="window.toggleAdmin()" class="text-slate-400 hover:text-white text-2xl border-none bg-transparent cursor-pointer">&times;</button>
         </div>
-        
-        <div id="editor-list" class="space-y-6 overflow-y-auto max-h-[calc(100vh-250px)] pr-2 custom-scroll text-white text-left"></div>
 
-        <div class="mt-6 pt-6 border-t border-slate-700 space-y-3 text-left">
-            <button onclick="window.addNewCategory()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold text-white transition-all shadow-lg border-none cursor-pointer">
-                + Yeni Kategori
-            </button>
-            <button onclick="window.seedDataToCloud()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400 border-none cursor-pointer">
-                Buluta Veri Yükle (Sync)
-            </button>
-            <button onclick="window.resetDataToCloud()" class="w-full py-2 border border-rose-900/30 hover:bg-rose-900/20 rounded-lg text-[10px] text-rose-400 border-none cursor-pointer">
-                Her Şeyi Sıfırla
-            </button>
+        <!-- Sidebar Sekmeleri -->
+        <div class="flex gap-2 mb-6">
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">İstatistikler</button>
+            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">Kişi Ekle</button>
+        </div>
+        
+        <!-- Sekme 1: İstatistik Düzenleme -->
+        <div id="sidebar-stats-content">
+            <div id="editor-list" class="space-y-6 mb-8"></div>
+            <div class="pt-6 border-t border-slate-700 space-y-3">
+                <button onclick="window.addNewCategory()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold text-white transition-all border-none">
+                    + Yeni Kategori
+                </button>
+                <button onclick="window.seedDataToCloud()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400">
+                    Sayıları Sync Et
+                </button>
+            </div>
+        </div>
+
+        <!-- Sekme 2: Yeni Kişi / Randevu Ekleme -->
+        <div id="sidebar-contacts-content" class="hidden space-y-4">
+            <h3 class="text-indigo-400 text-xs font-black uppercase mb-4">Yeni Görüşülecek Kişi</h3>
+            <div class="space-y-3">
+                <input type="text" id="contact-name" placeholder="Ad Soyad" class="custom-input">
+                <select id="contact-type" class="custom-input">
+                    <option value="">Kategori Seçin...</option>
+                    <!-- Kategoriler JS ile buraya dolacak -->
+                </select>
+                <input type="email" id="contact-email" placeholder="E-posta Adresi" class="custom-input">
+                <input type="tel" id="contact-phone" placeholder="Telefon Numarası" class="custom-input">
+                <div class="pt-2 border-t border-slate-800">
+                    <label class="text-[10px] text-slate-500 font-bold mb-1 block">ARACI BİLGİLERİ</label>
+                    <input type="text" id="contact-ref-name" placeholder="Aracı Kişinin Adı" class="custom-input mb-2">
+                    <input type="tel" id="contact-ref-phone" placeholder="Aracının Telefonu" class="custom-input">
+                </div>
+                <textarea id="contact-note" placeholder="Özel Notlar..." class="custom-input h-20"></textarea>
+                <button onclick="window.addContactToCloud()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all">
+                    Kişiyi Randevu Listesine Ekle
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="p-4 md:p-10 max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto px-4 md:px-10 py-10">
+        <!-- Header -->
         <header class="text-center mb-12 relative">
-            <div class="absolute top-0 right-0 z-10 hidden md:block">
-                <button onclick="window.toggleAdmin()" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer">
-                    🛠️ Verileri Düzenle
-                </button>
-            </div>
-            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter m-0 uppercase text-center w-full">
-                360° Görüşme Portalı
-            </h1>
-            <p id="sub-title" class="text-slate-400 text-lg m-0 text-center w-full italic">Veri yükleniyor...</p>
-            
-            <div class="mt-8 flex flex-wrap justify-center gap-4">
-                <button id="view-toggle-btn" onclick="window.toggleView()" class="bg-slate-800 text-white border border-slate-700 px-8 py-3 rounded-2xl font-bold hover:bg-slate-700 transition-all cursor-pointer">
-                    Tablo Görünümüne Geç
-                </button>
-                <button onclick="window.toggleAdmin()" class="md:hidden bg-indigo-600 text-white px-8 py-3 rounded-2xl font-bold transition-all shadow-lg cursor-pointer">
-                    🛠️ Verileri Düzenle
-                </button>
-            </div>
+            <button onclick="window.toggleAdmin()" class="absolute top-0 right-0 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer hidden md:block">
+                🛠️ Verileri Düzenle
+            </button>
+            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase">Görüşme ve İletişim Portalı</h1>
+            <p id="sub-title" class="text-slate-400 text-lg m-0 italic">Bulut senkronizasyonu bekleniyor...</p>
         </header>
 
+        <!-- Üst Özet Kartları -->
         <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 text-center"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-            <div class="lg:col-span-5 glass-card p-8 rounded-3xl flex flex-col items-center shadow-2xl">
+        <!-- Ana Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+            <div class="lg:col-span-5 glass-card p-8 rounded-3xl flex flex-col items-center">
                 <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6 text-center">Ağ Dengesi Analizi</h3>
-                <div class="chart-container">
-                    <canvas id="radarChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="radarChart"></canvas></div>
             </div>
 
             <div class="lg:col-span-7">
                 <div id="card-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                <div id="table-view" class="hidden glass-card rounded-3xl overflow-hidden shadow-2xl">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
-                            <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
-                                <tr>
-                                    <th class="px-6 py-5 text-left">Kategori</th>
-                                    <th class="px-6 py-5 text-center">Hedef</th>
-                                    <th class="px-6 py-5 text-center">Biten</th>
-                                    <th class="px-6 py-5 text-right">Başarı</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
+
+        <!-- YENİ: Görüşme ve Randevu Listesi -->
+        <section class="mt-10">
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-black text-white uppercase tracking-tight">📅 Görüşme ve Randevu Listesi</h2>
+                    <p class="text-slate-500 text-sm">Tez kapsamında iletişim kurulan veya kurulacak kişiler</p>
+                </div>
+                <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all">
+                    + Yeni Kişi Ekle
+                </button>
+            </div>
+
+            <div class="glass-card rounded-[2rem] overflow-hidden shadow-2xl border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
+                        <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-5">AD SOYAD / ÜNVAN</th>
+                                <th class="px-6 py-5">KATEGORİ</th>
+                                <th class="px-6 py-5">İLETİŞİM</th>
+                                <th class="px-6 py-5">ARACI BİLGİSİ</th>
+                                <th class="px-6 py-5">NOTLAR</th>
+                                <th class="px-6 py-5 text-right">EYLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contacts-table-body" class="divide-y divide-slate-800/50">
+                            <!-- JS ile dolacak -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="no-contacts" class="hidden py-20 text-center text-slate-500 italic">Henüz listeye kimse eklenmedi.</div>
+            </div>
+        </section>
     </div>
 
     <!-- Firebase SDK Entegrasyonu -->
@@ -155,7 +185,7 @@
         import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- DOĞRULANMIŞ YAPILANDIRMA ---
+        // --- YAPILANDIRMA ---
         const firebaseConfig = {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -168,7 +198,7 @@
 
         const appId = 'tezz-prod-v1';
         
-        const initialData = [
+        const initialStats = [
             { title: 'Hocalar', completed: 11, total: 11, emoji: '👨‍🏫', order: 1 },
             { title: 'STK (Sivil Toplum)', completed: 5, total: 6, emoji: '🌳', order: 2 },
             { title: 'Bürokratlar', completed: 4, total: 4, emoji: '🏛️', order: 3 },
@@ -177,159 +207,54 @@
             { title: 'Gazeteciler', completed: 0, total: 2, emoji: '🎤', order: 6 }
         ];
 
-        let db, auth;
-        let data = [];
-        let radarChart = null;
-        let currentView = 'card';
-
-        const showError = (msg) => {
-            const el = document.getElementById('error-log');
-            el.style.display = 'block';
-            el.innerHTML = `<strong>⚠️ Bağlantı Hatası:</strong> ${msg}`;
-            console.error(msg);
-        };
+        let db, auth, radarChart;
+        let stats = [];
+        let contacts = [];
 
         const startApp = async () => {
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-
-                // RULE 3: Auth FIRST
                 await signInAnonymously(auth);
                 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         renderOnlineStatus();
-                        setupDataListener();
+                        setupDataListeners();
                         document.getElementById('sub-title').innerText = "Canlı Bulut Senkronizasyonu Aktif";
                     }
                 });
             } catch (err) {
-                showError("Firebase başlatılamadı. Hata: " + err.message);
                 renderOfflineStatus();
-                useLocalFallback();
             }
         };
 
-        const setupDataListener = () => {
-            // RULE 1: Strict Path Structure
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler');
-            onSnapshot(colRef, (snapshot) => {
-                if (snapshot.empty) {
-                    console.log("Veritabanı boş, lütfen yan menüden Sync butonuna basın.");
-                    data = [];
-                    render(); renderEditor(); updateRadar();
-                    return;
-                }
-                data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                data.sort((a, b) => (a.order || 0) - (b.order || 0));
-                render(); renderEditor(); updateRadar();
-            }, (error) => {
-                showError("Firestore izin vermedi (Permission Denied). Firebase Console > Firestore > Rules kısmından kuralı güncellediniz mi? Hata: " + error.message);
-                renderOfflineStatus();
+        const setupDataListeners = () => {
+            // Stats Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), (snap) => {
+                stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
+                renderDashboard();
+                renderStatsEditor();
+                updateRadar();
+                updateContactCategoryDropdown();
+            });
+
+            // Contacts Listener
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), (snap) => {
+                contacts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderContactsTable();
             });
         };
 
-        window.seedDataToCloud = async () => {
-            if (!db || !auth.currentUser) return;
-            try {
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler');
-                for (const item of initialData) {
-                    const docId = item.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', docId), item);
-                }
-                alert("Veriler buluta gönderildi!");
-            } catch (e) { showError("Yazma izni hatası: " + e.message); }
-        };
-
-        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        
-        window.updateValue = async (id, field, value) => {
-            let val = (field === 'completed' || field === 'total') ? parseInt(value) || 0 : value;
-            if (db && auth.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id);
-                    await updateDoc(docRef, { [field]: val });
-                } catch (e) { showError("Veri güncellenemedi: " + e.message); }
-            } else {
-                const idx = data.findIndex(d => d.id === id);
-                if (idx !== -1) { data[idx][field] = val; render(); updateRadar(); }
-            }
-        };
-
-        window.addNewCategory = async () => {
-            const id = `cat-${Date.now()}`;
-            const newCat = { title: 'Yeni Kategori', completed: 0, total: 5, emoji: '👤', order: data.length + 1 };
-            if (db && auth.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id);
-                    await setDoc(docRef, newCat);
-                } catch (e) { showError("Yeni kategori eklenemedi: " + e.message); }
-            } else {
-                data.push({ id, ...newCat }); render(); renderEditor(); updateRadar();
-            }
-        };
-
-        window.removeCategory = async (id) => {
-            if (!confirm('Silmek istediğinize emin misiniz?')) return;
-            if (db && auth.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id);
-                    await deleteDoc(docRef);
-                } catch (e) { showError("Kategori silinemedi: " + e.message); }
-            } else {
-                data = data.filter(d => d.id !== id); render(); renderEditor(); updateRadar();
-            }
-        };
-
-        window.resetDataToCloud = async () => {
-            if (!confirm('Tüm veriler varsayılan haline dönecektir. Emin misiniz?')) return;
-            if (db && auth.currentUser) {
-                try {
-                    const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'));
-                    for (const d of snap.docs) await deleteDoc(d.ref);
-                    window.seedDataToCloud();
-                } catch (e) { showError("Sıfırlama hatası: " + e.message); }
-            }
-        };
-
-        window.toggleView = () => {
-            const cv = document.getElementById('card-view');
-            const tv = document.getElementById('table-view');
-            const btn = document.getElementById('view-toggle-btn');
-            currentView = (currentView === 'card' ? 'table' : 'card');
-            cv.classList.toggle('hidden', currentView !== 'card');
-            tv.classList.toggle('hidden', currentView !== 'table');
-            btn.innerText = currentView === 'card' ? "Tablo Görünümüne Geç" : "Kart Görünümüne Geç";
-        };
-
-        function renderOnlineStatus() {
-            const chip = document.getElementById('status-chip');
-            chip.innerText = "CANLI BULUT BAĞLANTISI";
-            chip.className = "bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-emerald-500/30 sync-pulse";
-        }
-
-        function renderOfflineStatus() {
-            const chip = document.getElementById('status-chip');
-            chip.innerText = "YEREL MOD (KAYDEDİLMEZ)";
-            chip.className = "bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-500/30";
-        }
-
-        function render() {
-            const cards = document.getElementById('card-view');
-            const table = document.getElementById('table-body');
+        // UI Renders
+        function renderDashboard() {
+            const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
-            if(!cards || !table || !summary) return;
-            
-            cards.innerHTML = ''; table.innerHTML = '';
+            container.innerHTML = '';
             let tDone = 0, tTarget = 0;
 
-            if (data.length === 0) {
-                cards.innerHTML = '<div class="col-span-full py-10 text-center text-slate-500 italic">Veri bulunamadı. Lütfen "Yönet" kısmından veri ekleyin veya sync edin.</div>';
-            }
-
-            data.forEach(item => {
+            stats.forEach(item => {
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
                 
@@ -337,27 +262,144 @@
                 card.className = 'glass-card rounded-3xl p-6 text-left shadow-lg';
                 let icons = '';
                 for(let i=0; i<item.total; i++) icons += `<span class="text-2xl inline-block mb-1 ${i < item.completed ? '' : 'opacity-10 grayscale'}">${item.emoji}</span>`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-4 text-white"><div class="text-left"><h3 class="font-bold text-sm m-0">${item.title}</h3><p class="text-[10px] opacity-40 uppercase font-bold m-0 mt-1">${item.completed}/${item.total}</p></div><span class="text-2xl font-black text-indigo-400">${perc}%</span></div><div class="flex flex-wrap gap-1 mb-6 min-h-[40px]">${icons}</div><div class="h-1 bg-slate-800 rounded-full overflow-hidden shadow-inner"><div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${perc}%"></div></div>`;
-                cards.appendChild(card);
-
-                const row = document.createElement('tr');
-                row.className = 'border-b border-slate-800/50 text-white hover:bg-white/5 transition-colors';
-                row.innerHTML = `<td class="px-6 py-4 font-bold text-xs text-left">${item.title}</td><td class="px-6 py-4 text-center opacity-50 text-xs">${item.total}</td><td class="px-6 py-4 text-center font-bold text-xs">${item.completed}</td><td class="px-6 py-4 text-right text-indigo-400 font-bold">%${perc}</td>`;
-                table.appendChild(row);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div><h3 class="font-bold text-sm m-0">${item.title}</h3><p class="text-[10px] opacity-40 uppercase font-bold m-0 mt-1">${item.completed}/${item.total}</p></div>
+                        <span class="text-2xl font-black text-indigo-400">${perc}%</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-6">${icons}</div>
+                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${perc}%"></div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
 
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
-            summary.innerHTML = `<div class="bg-indigo-600 p-5 rounded-3xl text-white shadow-xl flex flex-col justify-center text-center"><p class="text-[10px] font-bold uppercase opacity-60 m-0">GENEL BAŞARI</p><p class="text-3xl font-black m-0 mt-1">%${overall}</p></div><div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center"><p class="opacity-40 text-[10px] font-bold uppercase m-0">BİTEN</p><p class="text-3xl font-black m-0">${tDone}</p></div><div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center"><p class="opacity-40 text-[10px] font-bold uppercase m-0">KALAN</p><p class="text-3xl font-black m-0">${tTarget - tDone}</p></div><div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center"><p class="opacity-40 text-[10px] font-bold uppercase m-0">KATEGORİ</p><p class="text-3xl font-black m-0">${data.length}</p></div>`;
+            summary.innerHTML = `
+                <div class="glass-card p-5 rounded-3xl border-l-4 border-indigo-500"><p class="text-[10px] font-bold uppercase opacity-40">Başarı</p><p class="text-3xl font-black text-white">%${overall}</p></div>
+                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Biten</p><p class="text-3xl font-black text-white">${tDone}</p></div>
+                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Kalan</p><p class="text-3xl font-black text-indigo-400">${tTarget - tDone}</p></div>
+                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Kategori</p><p class="text-3xl font-black text-white">${stats.length}</p></div>
+            `;
         }
 
-        function renderEditor() {
+        function renderContactsTable() {
+            const body = document.getElementById('contacts-table-body');
+            const emptyState = document.getElementById('no-contacts');
+            body.innerHTML = '';
+            
+            if (contacts.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            contacts.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-indigo-500/5 transition-colors group text-sm';
+                tr.innerHTML = `
+                    <td class="px-6 py-5 font-bold text-white">${c.name}<br><span class="text-[10px] text-slate-500 opacity-80 uppercase tracking-tighter">Eklenme: ${new Date(c.createdAt || Date.now()).toLocaleDateString('tr-TR')}</span></td>
+                    <td class="px-6 py-5"><span class="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-black uppercase">${c.type}</span></td>
+                    <td class="px-6 py-5 text-slate-400 font-medium">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td>
+                    <td class="px-6 py-5 text-slate-400">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td>
+                    <td class="px-6 py-5 max-w-[200px]"><p class="truncate text-xs text-slate-500 italic" title="${c.note}">${c.note || 'Not yok.'}</p></td>
+                    <td class="px-6 py-5 text-right">
+                        <button onclick="window.deleteContact('${c.id}')" class="text-rose-900 group-hover:text-rose-500 transition-colors font-bold text-[10px] uppercase">SİL</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Actions
+        window.addContactToCloud = async () => {
+            const name = document.getElementById('contact-name').value;
+            const type = document.getElementById('contact-type').value;
+            if(!name || !type) { alert("Lütfen en azından İsim ve Kategori seçin!"); return; }
+
+            const contact = {
+                name, type,
+                email: document.getElementById('contact-email').value,
+                phone: document.getElementById('contact-phone').value,
+                refName: document.getElementById('contact-ref-name').value,
+                refPhone: document.getElementById('contact-ref-phone').value,
+                note: document.getElementById('contact-note').value,
+                createdAt: Date.now()
+            };
+
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', `contact-${Date.now()}`), contact);
+            
+            // Formu temizle
+            ['contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(id => document.getElementById(id).value = '');
+            alert("Kişi başarıyla kaydedildi!");
+        };
+
+        window.deleteContact = async (id) => {
+            if(confirm('Kişiyi listeden silmek istediğinize emin misiniz?')) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
+            }
+        };
+
+        window.updateContactCategoryDropdown = () => {
+            const select = document.getElementById('contact-type');
+            const current = select.value;
+            select.innerHTML = '<option value="">Kategori Seçin...</option>';
+            stats.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.title;
+                opt.innerText = s.title;
+                select.appendChild(opt);
+            });
+            select.value = current;
+        };
+
+        // Utility
+        window.switchSidebarTab = (tab) => {
+            const isStats = tab === 'stats';
+            document.getElementById('tab-stats').className = `tab-btn flex-1 ${isStats ? 'active' : 'inactive'}`;
+            document.getElementById('tab-contacts').className = `tab-btn flex-1 ${!isStats ? 'active' : 'inactive'}`;
+            document.getElementById('sidebar-stats-content').className = isStats ? '' : 'hidden';
+            document.getElementById('sidebar-contacts-content').className = !isStats ? '' : 'hidden';
+        };
+
+        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
+        
+        window.updateValue = async (id, field, value) => {
+            let val = (field === 'completed' || field === 'total') ? parseInt(value) || 0 : value;
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { [field]: val });
+        };
+
+        window.addNewCategory = async () => {
+            const id = `cat-${Date.now()}`;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { title: 'Yeni', completed: 0, total: 5, emoji: '📌', order: stats.length + 1 });
+        };
+
+        window.removeCategory = async (id) => {
+            if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
+        };
+
+        window.seedDataToCloud = async () => {
+            for (const item of initialStats) {
+                const docId = item.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', docId), item);
+            }
+        };
+
+        function renderStatsEditor() {
             const list = document.getElementById('editor-list');
-            if(!list) return;
             list.innerHTML = '';
-            data.forEach(item => {
+            stats.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'p-4 bg-slate-800/40 rounded-xl border border-slate-700 space-y-3 relative text-left';
-                div.innerHTML = `<button onclick="window.removeCategory('${item.id}')" class="absolute top-2 right-2 text-rose-500 text-xs border-none bg-transparent cursor-pointer hover:text-rose-400">Sil</button><div><label class="text-[10px] opacity-50 block mb-1 uppercase font-bold">Kategori Adı</label><input type="text" value="${item.title}" class="custom-input text-white" onchange="window.updateValue('${item.id}', 'title', this.value)"></div><div class="grid grid-cols-2 gap-2"><div><label class="text-[10px] opacity-50 block mb-1 font-bold uppercase text-slate-500">BİTEN</label><input type="number" value="${item.completed}" class="custom-input text-white" onchange="window.updateValue('${item.id}', 'completed', this.value)"></div><div><label class="text-[10px] opacity-50 block mb-1 font-bold uppercase text-slate-500">HEDEF</label><input type="number" value="${item.total}" class="custom-input text-white" onchange="window.updateValue('${item.id}', 'total', this.value)"></div></div>`;
+                div.className = 'p-4 bg-slate-800/40 rounded-xl border border-slate-700 relative text-left';
+                div.innerHTML = `
+                    <button onclick="window.removeCategory('${item.id}')" class="absolute top-2 right-2 text-rose-500 text-xs border-none bg-transparent cursor-pointer">Sil</button>
+                    <div><label class="text-[10px] opacity-50 block mb-1">BAŞLIK</label><input type="text" value="${item.title}" class="custom-input text-white" onchange="window.updateValue('${item.id}', 'title', this.value)"></div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div><label class="text-[10px] opacity-50">BİTEN</label><input type="number" value="${item.completed}" class="custom-input" onchange="window.updateValue('${item.id}', 'completed', this.value)"></div>
+                        <div><label class="text-[10px] opacity-50">HEDEF</label><input type="number" value="${item.total}" class="custom-input" onchange="window.updateValue('${item.id}', 'total', this.value)"></div>
+                    </div>
+                `;
                 list.appendChild(div);
             });
         }
@@ -370,10 +412,10 @@
             radarChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: data.length > 0 ? data.map(d => d.title) : ['-'],
+                    labels: stats.length > 0 ? stats.map(d => d.title) : ['-'],
                     datasets: [{
                         label: '% Başarı',
-                        data: data.length > 0 ? data.map(d => (d.completed/d.total)*100) : [0],
+                        data: stats.length > 0 ? stats.map(d => (d.completed/d.total)*100) : [0],
                         backgroundColor: 'rgba(99, 102, 241, 0.2)',
                         borderColor: '#6366f1',
                         borderWidth: 2,
@@ -390,10 +432,19 @@
             });
         }
 
-        function useLocalFallback() {
-            data = initialData;
-            render(); updateRadar(); renderEditor();
+        function renderOnlineStatus() {
+            const chip = document.getElementById('status-chip');
+            chip.innerText = "CANLI BULUT SENKRONİZE";
+            chip.className = "bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-emerald-500/30 sync-pulse";
         }
+
+        function renderOfflineStatus() {
+            const chip = document.getElementById('status-chip');
+            chip.innerText = "BAĞLANTI HATASI";
+            chip.className = "bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-500/30";
+        }
+
+        window.toggleView = () => {}; // Placeholder for consistency
 
         startApp();
     </script>
