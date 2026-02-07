@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>360° Görüşme ve Randevu Takip Portalı</title>
+    <title>360° Tez ve Randevu Yönetim Portalı</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -50,142 +50,149 @@
         }
 
         .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 350px; }
-        #status-indicator { position: fixed; top: 20px; right: 20px; z-index: 1000; }
         
-        @keyframes pulse-custom { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .sync-pulse { animation: pulse-custom 2s infinite; }
-        
-        .tab-btn { padding: 10px; font-weight: 700; font-size: 12px; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn { padding: 8px; font-weight: 700; font-size: 11px; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; }
         .tab-btn.active { background: #6366f1; color: white; }
         .tab-btn.inactive { background: #1e293b; color: #64748b; }
     </style>
 </head>
-<body class="min-h-screen antialiased text-left">
+<body class="min-h-screen antialiased text-left pb-20">
 
-    <!-- Bağlantı Durumu -->
-    <div id="status-indicator">
-        <div id="status-chip" class="bg-slate-800 text-slate-500 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-slate-700">
-            Bağlantı Kuruluyor...
-        </div>
-    </div>
-
-    <!-- Veri Düzenleme Paneli (Sidebar) -->
+    <!-- Admin Paneli (Sidebar) -->
     <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 bg-slate-900 border-l border-slate-700 p-6 admin-sidebar translate-x-full overflow-y-auto">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">⚙️ Yönetim</h2>
+            <h2 class="text-xl font-bold text-white">⚙️ Yönetim</h2>
             <button onclick="window.toggleAdmin()" class="text-slate-400 hover:text-white text-2xl border-none bg-transparent cursor-pointer">&times;</button>
         </div>
 
-        <!-- Sidebar Sekmeleri -->
-        <div class="flex gap-2 mb-6">
-            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">İstatistikler</button>
-            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">Kişi Ekle</button>
+        <div class="flex gap-1 mb-6">
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1 text-center">İstatistikler</button>
+            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1 text-center">Kişiler</button>
+            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1 text-center">Görevler</button>
         </div>
         
-        <!-- Sekme 1: İstatistik Düzenleme -->
+        <!-- Sayılar Düzenleme -->
         <div id="sidebar-stats-content">
-            <div id="editor-list" class="space-y-6 mb-8"></div>
+            <div id="editor-list" class="space-y-4 mb-8"></div>
             <div class="pt-6 border-t border-slate-700 space-y-3">
-                <button onclick="window.addNewCategory()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold text-white transition-all border-none">
-                    + Yeni Kategori
-                </button>
-                <button onclick="window.seedDataToCloud()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400">
-                    Sayıları Sync Et
-                </button>
+                <button onclick="window.addNewCategory()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold text-white transition-all border-none cursor-pointer">+ Yeni Kategori</button>
+                <button onclick="window.seedDataToCloud()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400 cursor-pointer">İstatistikleri Sıfırla</button>
             </div>
         </div>
 
-        <!-- Sekme 2: Yeni Kişi / Randevu Ekleme -->
-        <div id="sidebar-contacts-content" class="hidden space-y-4">
-            <h3 class="text-indigo-400 text-xs font-black uppercase mb-4">Yeni Görüşülecek Kişi</h3>
+        <!-- Kişi Ekleme/Düzenleme -->
+        <div id="sidebar-contacts-content" class="hidden space-y-4 text-left">
+            <div class="flex justify-between items-center">
+                <h3 class="text-indigo-400 text-xs font-black uppercase" id="contact-form-title">Yeni Kişi Kaydı</h3>
+                <button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold uppercase underline cursor-pointer">Vazgeç</button>
+            </div>
             <div class="space-y-3">
-                <input type="text" id="contact-name" placeholder="Ad Soyad" class="custom-input">
-                <select id="contact-type" class="custom-input">
-                    <option value="">Kategori Seçin...</option>
-                    <!-- Kategoriler JS ile buraya dolacak -->
-                </select>
-                <input type="email" id="contact-email" placeholder="E-posta Adresi" class="custom-input">
-                <input type="tel" id="contact-phone" placeholder="Telefon Numarası" class="custom-input">
+                <input type="hidden" id="contact-edit-id">
+                <input type="text" id="contact-name" placeholder="Ad Soyad / Ünvan" class="custom-input">
+                <select id="contact-type" class="custom-input"></select>
+                <input type="email" id="contact-email" placeholder="E-posta" class="custom-input">
+                <input type="tel" id="contact-phone" placeholder="Telefon" class="custom-input">
                 <div class="pt-2 border-t border-slate-800">
-                    <label class="text-[10px] text-slate-500 font-bold mb-1 block">ARACI BİLGİLERİ</label>
-                    <input type="text" id="contact-ref-name" placeholder="Aracı Kişinin Adı" class="custom-input mb-2">
+                    <label class="text-[10px] text-slate-500 font-bold mb-1 block">ARACI / REFERANS</label>
+                    <input type="text" id="contact-ref-name" placeholder="Aracının Adı" class="custom-input mb-2">
                     <input type="tel" id="contact-ref-phone" placeholder="Aracının Telefonu" class="custom-input">
                 </div>
-                <textarea id="contact-note" placeholder="Özel Notlar..." class="custom-input h-20"></textarea>
-                <button onclick="window.addContactToCloud()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all">
-                    Kişiyi Randevu Listesine Ekle
-                </button>
+                <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-20"></textarea>
+                <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all cursor-pointer">Kaydet</button>
+            </div>
+        </div>
+
+        <!-- Görev Ekleme -->
+        <div id="sidebar-todos-content" class="hidden space-y-4 text-left">
+            <h3 class="text-indigo-400 text-xs font-black uppercase mb-4">Yeni Akademik Görev</h3>
+            <div class="space-y-3">
+                <input type="text" id="todo-task" placeholder="Görev Tanımı" class="custom-input">
+                <select id="todo-status" class="custom-input">
+                    <option value="Yapılmadı">Yapılmadı</option>
+                    <option value="Yapıldı">Yapıldı</option>
+                    <option value="Diğer">Diğer</option>
+                </select>
+                <textarea id="todo-desc" placeholder="Açıklama/Not..." class="custom-input h-24"></textarea>
+                <button onclick="window.addTodoToCloud()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all cursor-pointer">Ekle</button>
+                <button onclick="window.seedInitialTodos()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400 mt-10 cursor-pointer">Tez Görevlerini Varsayılana Döndür</button>
             </div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 md:px-10 py-10">
-        <!-- Header -->
         <header class="text-center mb-12 relative">
-            <button onclick="window.toggleAdmin()" class="absolute top-0 right-0 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer hidden md:block">
-                🛠️ Verileri Düzenle
-            </button>
-            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase">Görüşme ve İletişim Portalı</h1>
-            <p id="sub-title" class="text-slate-400 text-lg m-0 italic">Bulut senkronizasyonu bekleniyor...</p>
+            <button onclick="window.toggleAdmin()" class="absolute top-0 right-0 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer hidden md:block">🛠️ Verileri Yönet</button>
+            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase text-center w-full">Tez Stratejik Yönetim Portalı</h1>
+            <p id="sub-title" class="text-slate-400 text-lg m-0 italic text-center w-full">Bağlantı aktif.</p>
         </header>
 
-        <!-- Üst Özet Kartları -->
         <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 text-center"></div>
 
-        <!-- Ana Dashboard -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
             <div class="lg:col-span-5 glass-card p-8 rounded-3xl flex flex-col items-center">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6 text-center">Ağ Dengesi Analizi</h3>
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6">Ağ Dengesi</h3>
                 <div class="chart-container"><canvas id="radarChart"></canvas></div>
             </div>
-
             <div class="lg:col-span-7">
                 <div id="card-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
 
-        <!-- YENİ: Görüşme ve Randevu Listesi -->
-        <section class="mt-10">
+        <!-- Görüşme Rehberi -->
+        <section class="mt-16">
             <div class="flex justify-between items-end mb-6">
-                <div>
-                    <h2 class="text-2xl font-black text-white uppercase tracking-tight">📅 Görüşme ve Randevu Listesi</h2>
-                    <p class="text-slate-500 text-sm">Tez kapsamında iletişim kurulan veya kurulacak kişiler</p>
-                </div>
-                <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all">
-                    + Yeni Kişi Ekle
-                </button>
+                <h2 class="text-2xl font-black text-white uppercase tracking-tight">📅 Görüşme ve İletişim Rehberi</h2>
+                <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-indigo-500 cursor-pointer">+ Kişi Ekle</button>
             </div>
-
-            <div class="glass-card rounded-[2rem] overflow-hidden shadow-2xl border border-slate-800">
+            <div class="glass-card rounded-[2rem] overflow-hidden border border-slate-800">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse min-w-[1000px]">
                         <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-700">
                             <tr>
-                                <th class="px-6 py-5">AD SOYAD / ÜNVAN</th>
+                                <th class="px-6 py-5">AD SOYAD</th>
                                 <th class="px-6 py-5">KATEGORİ</th>
                                 <th class="px-6 py-5">İLETİŞİM</th>
-                                <th class="px-6 py-5">ARACI BİLGİSİ</th>
+                                <th class="px-6 py-5">ARACI / REF</th>
                                 <th class="px-6 py-5">NOTLAR</th>
                                 <th class="px-6 py-5 text-right">EYLEM</th>
                             </tr>
                         </thead>
-                        <tbody id="contacts-table-body" class="divide-y divide-slate-800/50">
-                            <!-- JS ile dolacak -->
-                        </tbody>
+                        <tbody id="contacts-table-body" class="divide-y divide-slate-800/50"></tbody>
                     </table>
                 </div>
-                <div id="no-contacts" class="hidden py-20 text-center text-slate-500 italic">Henüz listeye kimse eklenmedi.</div>
+            </div>
+        </section>
+
+        <!-- Yapılacaklar Listesi -->
+        <section class="mt-20">
+            <div class="flex justify-between items-end mb-6">
+                <h2 class="text-2xl font-black text-white uppercase tracking-tight">✅ Akademik Yapılacaklar Listesi</h2>
+                <button onclick="window.toggleAdmin(); window.switchSidebarTab('todos')" class="bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-600 hover:text-white cursor-pointer">+ Yeni Görev</button>
+            </div>
+            <div class="glass-card rounded-[2rem] overflow-hidden border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-700">
+                            <tr>
+                                <th class="px-6 py-5">GÖREV TANIMI</th>
+                                <th class="px-6 py-5 w-40">DURUM</th>
+                                <th class="px-6 py-5">AÇIKLAMA / DETAY</th>
+                                <th class="px-6 py-5 text-right">EYLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todo-table-body" class="divide-y divide-slate-800/50"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </div>
 
-    <!-- Firebase SDK Entegrasyonu -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- YAPILANDIRMA ---
         const firebaseConfig = {
             apiKey: "AIzaSyCbIuOJeKNpJToMg2-PsblLtue-mzElUQY",
             authDomain: "tezz-95f0d.firebaseapp.com",
@@ -207,244 +214,188 @@
             { title: 'Gazeteciler', completed: 0, total: 2, emoji: '🎤', order: 6 }
         ];
 
+        const initialTodos = [
+            "Tez komple toparlanacak", "Yöntem kısmı yazılacak", "Analiz videoları izlenecek", "MAXQDA sorunu çözülecek",
+            "Kavramsal çerçeveye sürdürülebilirlik eklemlenecek", "Hocanın söylediği akademisyenlerle görüşülecek",
+            "Bakanlık izin yazısı yazdırılıp takip edilecek", "STK’larla yeniden iletişime geçilecek",
+            "Milletvekilleriyle yeniden iletişime geçilecek", "Şirketlerle iletişime geçilecek",
+            "İklim gazetecileriyle iletişime geçilecek", "BAP talepleri halledilecek"
+        ];
+
         let db, auth, radarChart;
-        let stats = [];
-        let contacts = [];
+        let stats = [], contacts = [], todos = [];
 
         const startApp = async () => {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                await signInAnonymously(auth);
-                
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        renderOnlineStatus();
-                        setupDataListeners();
-                        document.getElementById('sub-title').innerText = "Canlı Bulut Senkronizasyonu Aktif";
-                    }
-                });
-            } catch (err) {
-                renderOfflineStatus();
-            }
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            await signInAnonymously(auth);
+            onAuthStateChanged(auth, (user) => {
+                if (user) setupDataListeners();
+            });
         };
 
         const setupDataListeners = () => {
-            // Stats Listener
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), (snap) => {
-                stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
-                renderDashboard();
-                renderStatsEditor();
-                updateRadar();
-                updateContactCategoryDropdown();
+                stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.order - b.order);
+                renderDashboard(); renderStatsEditor(); updateRadar(); updateContactDropdown();
             });
-
-            // Contacts Listener
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), (snap) => {
                 contacts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderContactsTable();
             });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), (snap) => {
+                if (snap.empty) { window.seedInitialTodos(); return; }
+                todos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => a.createdAt - b.createdAt);
+                renderTodoTable();
+            });
         };
 
-        // UI Renders
+        // --- RENDER FUNCTIONS ---
         function renderDashboard() {
             const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
             container.innerHTML = '';
             let tDone = 0, tTarget = 0;
-
             stats.forEach(item => {
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
-                
                 const card = document.createElement('div');
                 card.className = 'glass-card rounded-3xl p-6 text-left shadow-lg';
                 let icons = '';
-                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl inline-block mb-1 ${i < item.completed ? '' : 'opacity-10 grayscale'}">${item.emoji}</span>`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <div><h3 class="font-bold text-sm m-0">${item.title}</h3><p class="text-[10px] opacity-40 uppercase font-bold m-0 mt-1">${item.completed}/${item.total}</p></div>
-                        <span class="text-2xl font-black text-indigo-400">${perc}%</span>
-                    </div>
-                    <div class="flex flex-wrap gap-1 mb-6">${icons}</div>
-                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${perc}%"></div>
-                    </div>
-                `;
+                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-10 grayscale'}">${item.emoji}</span>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-4"><div><h3 class="font-bold text-sm">${item.title}</h3><p class="text-[10px] opacity-40 uppercase font-bold">${item.completed}/${item.total}</p></div><span class="text-2xl font-black text-indigo-400">${perc}%</span></div><div class="flex flex-wrap gap-1 mb-6">${icons}</div><div class="h-1 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${perc}%"></div></div>`;
                 container.appendChild(card);
             });
-
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
-            summary.innerHTML = `
-                <div class="glass-card p-5 rounded-3xl border-l-4 border-indigo-500"><p class="text-[10px] font-bold uppercase opacity-40">Başarı</p><p class="text-3xl font-black text-white">%${overall}</p></div>
-                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Biten</p><p class="text-3xl font-black text-white">${tDone}</p></div>
-                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Kalan</p><p class="text-3xl font-black text-indigo-400">${tTarget - tDone}</p></div>
-                <div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold uppercase opacity-40">Kategori</p><p class="text-3xl font-black text-white">${stats.length}</p></div>
-            `;
+            summary.innerHTML = `<div class="glass-card p-5 rounded-3xl border-l-4 border-indigo-500"><p class="text-[10px] font-bold opacity-40">Genel Başarı</p><p class="text-3xl font-black">%${overall}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Biten</p><p class="text-3xl font-black">${tDone}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Kalan</p><p class="text-3xl font-black text-indigo-400">${tTarget-tDone}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Kategori</p><p class="text-3xl font-black">${stats.length}</p></div>`;
         }
 
         function renderContactsTable() {
             const body = document.getElementById('contacts-table-body');
-            const emptyState = document.getElementById('no-contacts');
-            body.innerHTML = '';
-            
-            if (contacts.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
-
+            body.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-10 text-center opacity-30 italic">Rehber boş.</td></tr>' : '';
             contacts.forEach(c => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-indigo-500/5 transition-colors group text-sm';
-                tr.innerHTML = `
-                    <td class="px-6 py-5 font-bold text-white">${c.name}<br><span class="text-[10px] text-slate-500 opacity-80 uppercase tracking-tighter">Eklenme: ${new Date(c.createdAt || Date.now()).toLocaleDateString('tr-TR')}</span></td>
-                    <td class="px-6 py-5"><span class="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-black uppercase">${c.type}</span></td>
-                    <td class="px-6 py-5 text-slate-400 font-medium">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td>
-                    <td class="px-6 py-5 text-slate-400">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td>
-                    <td class="px-6 py-5 max-w-[200px]"><p class="truncate text-xs text-slate-500 italic" title="${c.note}">${c.note || 'Not yok.'}</p></td>
-                    <td class="px-6 py-5 text-right">
-                        <button onclick="window.deleteContact('${c.id}')" class="text-rose-900 group-hover:text-rose-500 transition-colors font-bold text-[10px] uppercase">SİL</button>
-                    </td>
-                `;
+                tr.className = 'hover:bg-white/5 transition-colors text-sm';
+                tr.innerHTML = `<td class="px-6 py-5 font-bold">${c.name}</td><td class="px-6 py-5"><span class="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-black uppercase">${c.type}</span></td><td class="px-6 py-5 text-slate-400">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td><td class="px-6 py-5 text-slate-400">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td><td class="px-6 py-5 max-w-[200px] text-xs text-slate-500 italic">${c.note || '-'}</td><td class="px-6 py-5 text-right space-x-2"><button onclick="window.editContact('${c.id}')" class="text-indigo-400 hover:text-indigo-300 font-bold text-[10px] cursor-pointer">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-900 hover:text-rose-500 font-bold text-[10px] cursor-pointer">SİL</button></td>`;
                 body.appendChild(tr);
             });
         }
 
-        // Actions
+        function renderTodoTable() {
+            const body = document.getElementById('todo-table-body');
+            body.innerHTML = '';
+            todos.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-white/5 transition-colors text-sm';
+                const statusColor = t.status === 'Yapıldı' ? 'text-emerald-400' : (t.status === 'Diğer' ? 'text-indigo-400' : 'text-slate-500');
+                tr.innerHTML = `<td class="px-6 py-5 text-white font-semibold">${t.task}</td><td class="px-6 py-5"><select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-slate-900 border border-slate-700 text-xs p-1 rounded ${statusColor}"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select></td><td class="px-6 py-5"><input type="text" value="${t.desc || ''}" placeholder="Detay yazın..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b border-slate-800 focus:border-indigo-500 outline-none w-full text-xs text-slate-400 italic"></td><td class="px-6 py-5 text-right"><button onclick="window.deleteTodo('${t.id}')" class="text-rose-900 hover:text-rose-500 font-bold text-[10px] cursor-pointer">SİL</button></td>`;
+                body.appendChild(tr);
+            });
+        }
+
+        // --- ACTIONS ---
         window.addContactToCloud = async () => {
+            const id = document.getElementById('contact-edit-id').value;
             const name = document.getElementById('contact-name').value;
             const type = document.getElementById('contact-type').value;
-            if(!name || !type) { alert("Lütfen en azından İsim ve Kategori seçin!"); return; }
-
-            const contact = {
-                name, type,
-                email: document.getElementById('contact-email').value,
-                phone: document.getElementById('contact-phone').value,
-                refName: document.getElementById('contact-ref-name').value,
-                refPhone: document.getElementById('contact-ref-phone').value,
-                note: document.getElementById('contact-note').value,
-                createdAt: Date.now()
-            };
-
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', `contact-${Date.now()}`), contact);
-            
-            // Formu temizle
-            ['contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(id => document.getElementById(id).value = '');
-            alert("Kişi başarıyla kaydedildi!");
+            if(!name || !type) return alert("İsim ve Kategori zorunludur!");
+            const cData = { name, type, email: document.getElementById('contact-email').value, phone: document.getElementById('contact-phone').value, refName: document.getElementById('contact-ref-name').value, refPhone: document.getElementById('contact-ref-phone').value, note: document.getElementById('contact-note').value, updatedAt: Date.now() };
+            if(id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id), cData);
+            else { cData.createdAt = Date.now(); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', `c-${Date.now()}`), cData); }
+            window.resetContactForm();
         };
 
-        window.deleteContact = async (id) => {
-            if(confirm('Kişiyi listeden silmek istediğinize emin misiniz?')) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
+        window.editContact = (id) => {
+            const c = contacts.find(i => i.id === id);
+            if(!c) return;
+            document.getElementById('contact-edit-id').value = c.id;
+            document.getElementById('contact-name').value = c.name;
+            document.getElementById('contact-type').value = c.type;
+            document.getElementById('contact-email').value = c.email || '';
+            document.getElementById('contact-phone').value = c.phone || '';
+            document.getElementById('contact-ref-name').value = c.refName || '';
+            document.getElementById('contact-ref-phone').value = c.refPhone || '';
+            document.getElementById('contact-note').value = c.note || '';
+            document.getElementById('contact-form-title').innerText = "Kişiyi Düzenle";
+            document.getElementById('btn-cancel-edit').classList.remove('hidden');
+            document.getElementById('btn-save-contact').innerText = "Güncelle";
+            window.switchSidebarTab('contacts');
+            if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
+        };
+
+        window.resetContactForm = () => {
+            ['contact-edit-id','contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(i => document.getElementById(i).value = '');
+            document.getElementById('contact-form-title').innerText = "Yeni Kişi Kaydı";
+            document.getElementById('btn-cancel-edit').classList.add('hidden');
+            document.getElementById('btn-save-contact').innerText = "Kaydet";
+        };
+
+        window.addTodoToCloud = async () => {
+            const task = document.getElementById('todo-task').value;
+            if(!task) return alert("Görev tanımı girin!");
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `t-${Date.now()}`), { task, status: document.getElementById('todo-status').value, desc: document.getElementById('todo-desc').value, createdAt: Date.now() });
+            document.getElementById('todo-task').value = ''; document.getElementById('todo-desc').value = '';
+        };
+
+        window.updateTodoStatus = async (id, status) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { status });
+        window.updateTodoDesc = async (id, desc) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { desc });
+        window.deleteTodo = async (id) => confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id));
+        window.deleteContact = async (id) => confirm('Kişi silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
+
+        window.seedInitialTodos = async () => {
+            if(!confirm('Mevcut liste silinip 12 maddelik başlangıç listesi yüklenecek. Emin misiniz?')) return;
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'));
+            for(const d of snap.docs) await deleteDoc(d.ref);
+            for(let i=0; i<initialTodos.length; i++) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `init-${i}`), { task: initialTodos[i], status: 'Yapılmadı', desc: '', createdAt: Date.now() + i });
             }
-        };
-
-        window.updateContactCategoryDropdown = () => {
-            const select = document.getElementById('contact-type');
-            const current = select.value;
-            select.innerHTML = '<option value="">Kategori Seçin...</option>';
-            stats.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.title;
-                opt.innerText = s.title;
-                select.appendChild(opt);
-            });
-            select.value = current;
-        };
-
-        // Utility
-        window.switchSidebarTab = (tab) => {
-            const isStats = tab === 'stats';
-            document.getElementById('tab-stats').className = `tab-btn flex-1 ${isStats ? 'active' : 'inactive'}`;
-            document.getElementById('tab-contacts').className = `tab-btn flex-1 ${!isStats ? 'active' : 'inactive'}`;
-            document.getElementById('sidebar-stats-content').className = isStats ? '' : 'hidden';
-            document.getElementById('sidebar-contacts-content').className = !isStats ? '' : 'hidden';
-        };
-
-        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        
-        window.updateValue = async (id, field, value) => {
-            let val = (field === 'completed' || field === 'total') ? parseInt(value) || 0 : value;
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { [field]: val });
-        };
-
-        window.addNewCategory = async () => {
-            const id = `cat-${Date.now()}`;
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { title: 'Yeni', completed: 0, total: 5, emoji: '📌', order: stats.length + 1 });
-        };
-
-        window.removeCategory = async (id) => {
-            if(confirm('Silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
         };
 
         window.seedDataToCloud = async () => {
-            for (const item of initialStats) {
-                const docId = item.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', docId), item);
-            }
+            if(!confirm('Sayısal veriler sıfırlanacak. Emin misiniz?')) return;
+            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'));
+            for(const d of snap.docs) await deleteDoc(d.ref);
+            for (const item of initialStats) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', item.title.toLowerCase().replace(/\s/g,'-')), item);
         };
+
+        window.addNewCategory = async () => await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', `cat-${Date.now()}`), { title: 'Yeni', completed: 0, total: 5, emoji: '📌', order: stats.length + 1 });
+        window.updateValue = async (id, field, value) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { [field]: (field === 'completed' || field === 'total' ? parseInt(value) || 0 : value) });
+        window.removeCategory = async (id) => confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
+
+        // --- UTILS ---
+        window.switchSidebarTab = (tab) => {
+            ['stats', 'contacts', 'todos'].forEach(t => {
+                document.getElementById(`tab-${t}`).className = `tab-btn flex-1 text-center ${t === tab ? 'active' : 'inactive'}`;
+                document.getElementById(`sidebar-${t}-content`).className = t === tab ? '' : 'hidden';
+            });
+        };
+        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
+        
+        function updateContactDropdown() {
+            const select = document.getElementById('contact-type');
+            const cur = select.value;
+            select.innerHTML = '<option value="">Kategori...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
+            select.value = cur;
+        }
 
         function renderStatsEditor() {
             const list = document.getElementById('editor-list');
-            list.innerHTML = '';
-            stats.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'p-4 bg-slate-800/40 rounded-xl border border-slate-700 relative text-left';
-                div.innerHTML = `
-                    <button onclick="window.removeCategory('${item.id}')" class="absolute top-2 right-2 text-rose-500 text-xs border-none bg-transparent cursor-pointer">Sil</button>
-                    <div><label class="text-[10px] opacity-50 block mb-1">BAŞLIK</label><input type="text" value="${item.title}" class="custom-input text-white" onchange="window.updateValue('${item.id}', 'title', this.value)"></div>
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div><label class="text-[10px] opacity-50">BİTEN</label><input type="number" value="${item.completed}" class="custom-input" onchange="window.updateValue('${item.id}', 'completed', this.value)"></div>
-                        <div><label class="text-[10px] opacity-50">HEDEF</label><input type="number" value="${item.total}" class="custom-input" onchange="window.updateValue('${item.id}', 'total', this.value)"></div>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
+            list.innerHTML = stats.map(i => `<div class="p-4 bg-slate-800/40 rounded-xl border border-slate-700 relative">
+                <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-500 text-xs border-none bg-transparent cursor-pointer">Sil</button>
+                <div><label class="text-[10px] opacity-50 block mb-1">BAŞLIK</label><input type="text" value="${i.title}" class="custom-input" onchange="window.updateValue('${i.id}', 'title', this.value)"></div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <div><label class="text-[10px] opacity-50">BİTEN</label><input type="number" value="${i.completed}" class="custom-input" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div>
+                    <div><label class="text-[10px] opacity-50">HEDEF</label><input type="number" value="${i.total}" class="custom-input" onchange="window.updateValue('${i.id}', 'total', this.value)"></div>
+                </div>
+            </div>`).join('');
         }
 
         function updateRadar() {
-            const canvas = document.getElementById('radarChart');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
+            const ctx = document.getElementById('radarChart').getContext('2d');
             if(radarChart) radarChart.destroy();
-            radarChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: stats.length > 0 ? stats.map(d => d.title) : ['-'],
-                    datasets: [{
-                        label: '% Başarı',
-                        data: stats.length > 0 ? stats.map(d => (d.completed/d.total)*100) : [0],
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: '#6366f1',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#6366f1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { r: { angleLines: { color: 'rgba(255,255,255,0.05)' }, grid: { color: 'rgba(255,255,255,0.05)' }, pointLabels: { color: '#94a3b8', font: { size: 9, weight: '600' } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 } },
-                    plugins: { legend: { display: false } }
-                }
-            });
+            radarChart = new Chart(ctx, { type: 'radar', data: { labels: stats.map(d => d.title), datasets: [{ label: '% Başarı', data: stats.map(d => (d.completed/d.total)*100), backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', borderWidth: 2, pointBackgroundColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#94a3b8', font: { size: 9, weight: '600' } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } } });
         }
-
-        function renderOnlineStatus() {
-            const chip = document.getElementById('status-chip');
-            chip.innerText = "CANLI BULUT SENKRONİZE";
-            chip.className = "bg-emerald-600/20 text-emerald-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-emerald-500/30 sync-pulse";
-        }
-
-        function renderOfflineStatus() {
-            const chip = document.getElementById('status-chip');
-            chip.innerText = "BAĞLANTI HATASI";
-            chip.className = "bg-rose-600/20 text-rose-400 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border border-rose-500/30";
-        }
-
-        window.toggleView = () => {}; // Placeholder for consistency
 
         startApp();
     </script>
