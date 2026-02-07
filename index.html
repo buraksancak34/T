@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>360° Tez ve Randevu Yönetim Portalı</title>
+    <title>360° İlker'in İzlencesi</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
@@ -62,8 +62,8 @@
 
         .chart-container { position: relative; width: 100%; height: 350px; }
         
-        .tab-btn { padding: 10px; font-weight: 800; font-size: 11px; border-radius: 12px; transition: all 0.2s; text-transform: uppercase; }
-        .tab-btn.active { background: #6366f1; color: white; box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3); }
+        .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; transition: all 0.2s; text-transform: uppercase; }
+        .tab-btn.active { background: #6366f1; color: white; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2); }
         .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
 
         .btn-action {
@@ -79,12 +79,9 @@
         .badge-pending { background: #fef9c3; color: #a16207; }
         .badge-other { background: #e0e7ff; color: #4338ca; }
 
-        /* Başarı Glow Efekti */
         .glow-gold { text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); color: #eab308; }
         .glow-bright-gold { text-shadow: 0 0 25px rgba(250, 204, 21, 0.7); color: #facc15; }
-        .text-critical { color: #0f172a; }
-
-        /* Geri Sayım Kutusu */
+        
         .countdown-item {
             background: white;
             padding: 4px 10px;
@@ -94,6 +91,36 @@
             align-items: center;
             gap: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .mode-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .mode-guest { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+        .mode-admin { background: #6366f1; color: white; border: 1px solid #4f46e5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+
+        .hidden-mode { display: none !important; }
+
+        .important-note {
+            color: #ef4444 !important;
+            font-weight: 600 !important;
+            opacity: 1 !important;
+        }
+
+        #ata-quote-container {
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
     </style>
 </head>
@@ -106,22 +133,21 @@
             <button onclick="window.toggleAdmin()" class="text-slate-300 hover:text-slate-600 text-3xl transition-colors">&times;</button>
         </div>
 
-        <div class="flex gap-2 mb-8 bg-slate-50 p-2 rounded-2xl">
-            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">İstatistikler</button>
+        <div class="flex gap-1 mb-8 bg-slate-50 p-1 rounded-2xl">
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">Sayılar</button>
             <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">Kişiler</button>
             <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1">Görevler</button>
+            <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1">Sözler</button>
         </div>
         
-        <!-- Sayılar -->
         <div id="sidebar-stats-content">
             <div id="editor-list" class="space-y-5 mb-8"></div>
             <div class="pt-8 border-t border-slate-100 space-y-3">
                 <button onclick="window.addNewCategory()" class="w-full py-4 btn-action rounded-2xl text-sm font-bold shadow-xl border-none">+ Yeni Kategori</button>
-                <button onclick="window.seedDataToCloud()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase hover:text-slate-600 transition-colors">Verileri Baştan Yükle</button>
+                <button onclick="window.seedDataToCloud()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase">Sayıları Sıfırla</button>
             </div>
         </div>
 
-        <!-- Kişiler -->
         <div id="sidebar-contacts-content" class="hidden space-y-5">
             <div class="flex justify-between items-center">
                 <h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="contact-form-title">Yeni Kayıt</h3>
@@ -134,7 +160,7 @@
                 <input type="email" id="contact-email" placeholder="E-posta" class="custom-input">
                 <input type="tel" id="contact-phone" placeholder="Telefon" class="custom-input">
                 <div class="pt-4 border-t border-slate-100">
-                    <label class="text-[10px] font-bold text-slate-400 mb-2 block">ARACI / REFERANS</label>
+                    <label class="text-[10px] font-bold text-slate-400 mb-2 block uppercase">Referans Bilgisi</label>
                     <input type="text" id="contact-ref-name" placeholder="Referans İsmi" class="custom-input mb-3">
                     <input type="tel" id="contact-ref-phone" placeholder="Referans Telefonu" class="custom-input">
                 </div>
@@ -143,7 +169,6 @@
             </div>
         </div>
 
-        <!-- Görevler -->
         <div id="sidebar-todos-content" class="hidden space-y-5">
             <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Görev Planlayıcı</h3>
             <div class="space-y-4">
@@ -155,36 +180,60 @@
                 </select>
                 <textarea id="todo-desc" placeholder="Açıklama..." class="custom-input h-24"></textarea>
                 <button onclick="window.addTodoToCloud()" class="w-full py-4 btn-action rounded-2xl font-black text-sm">GÖREV EKLE</button>
-                <button onclick="window.seedInitialTodos()" class="w-full py-3 bg-rose-50 text-rose-500 rounded-2xl text-[10px] font-bold uppercase mt-10 hover:bg-rose-100 transition-all">Tüm Görevleri Sıfırla</button>
+                <button onclick="window.seedInitialTodos()" class="w-full py-3 bg-rose-50 text-rose-500 rounded-2xl text-[10px] font-bold uppercase mt-10">Görevleri Sıfırla</button>
+            </div>
+        </div>
+
+        <div id="sidebar-quotes-content" class="hidden space-y-5">
+            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Atatürk Sözleri Havuzu</h3>
+            <div class="space-y-4">
+                <textarea id="new-quote-text" placeholder="Yeni vecize ekleyin..." class="custom-input h-24"></textarea>
+                <button onclick="window.addQuoteToCloud()" class="w-full py-4 btn-action rounded-2xl font-black text-sm">SÖZ EKLE</button>
+                
+                <div class="pt-8 border-t border-slate-100">
+                    <label class="text-[10px] font-black text-slate-400 uppercase mb-4 block">Mevcut Sözler</label>
+                    <div id="quote-manager-list" class="space-y-3"></div>
+                </div>
+                <button onclick="window.seedQuotesToCloud()" class="w-full py-2 text-slate-300 text-[9px] font-bold uppercase mt-6">Sözleri Başlangıca Döndür</button>
             </div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-6 py-12">
-        <!-- Header & Countdown -->
         <header class="flex flex-col md:flex-row justify-between items-start mb-16 gap-8 text-center md:text-left">
             <div>
                 <h1 class="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter leading-none m-0 uppercase">
-                    TEZ <span class="text-indigo-600 italic">PORTALI</span>
+                    İLKER'İN <span class="text-indigo-600 italic">İZLENCESİ</span>
                 </h1>
-                <p id="sub-title" class="text-slate-400 text-lg mt-3 font-semibold">Bulut tabanlı stratejik ilerleme analizi ✨</p>
-                <div class="mt-6 flex flex-wrap gap-2 justify-center md:justify-start">
-                    <button onclick="window.toggleAdmin()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:shadow-lg transition-all cursor-pointer">
-                        🛠️ Verileri Yönet
-                    </button>
+                <p id="sub-title" class="text-slate-400 text-lg mt-3 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
+                
+                <div class="mt-6 flex flex-col gap-5 items-center md:items-start">
+                    <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
+                        <div id="mode-status" class="mode-indicator mode-guest">
+                            <span id="mode-icon">👤</span>
+                            <span id="mode-text">Misafir Modu</span>
+                        </div>
+                        <button id="btn-login-toggle" onclick="window.handleAuth()" class="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-700 underline transition-all">Yönetici Girişi</button>
+                        
+                        <button onclick="window.toggleAdmin()" id="btn-master-manage" class="hidden-mode bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:shadow-lg transition-all cursor-pointer">
+                            🛠️ Verileri Yönet
+                        </button>
+                    </div>
+
+                    <!-- Atatürk Sözü Bölümü -->
+                    <div id="ata-quote-container" class="max-w-xl">
+                        <p id="ata-quote" class="text-slate-700 text-sm font-medium italic leading-relaxed border-l-4 border-indigo-400 pl-5 py-2"></p>
+                        <p id="ata-author" class="text-indigo-500 text-[10px] font-black uppercase tracking-widest mt-2 pl-5">Mustafa Kemal Atatürk</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Sağ Üst Geri Sayım Modülü -->
             <div class="glass-card p-5 rounded-[2rem] flex flex-col gap-2 min-w-[280px]">
                 <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mb-1 text-center">Akademik Takvim & Geri Sayım</h3>
-                <div id="countdown-list" class="space-y-1.5">
-                    <!-- Geri sayımlar buraya dolacak -->
-                </div>
+                <div id="countdown-list" class="space-y-1.5"></div>
             </div>
         </header>
 
-        <!-- Dynamic Success Cards -->
         <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16"></div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-24">
@@ -197,14 +246,13 @@
             </div>
         </div>
 
-        <!-- Tables -->
         <div class="space-y-24">
             <section>
                 <div class="flex justify-between items-end mb-8 px-4">
                     <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">📅 İletişim Rehberi</h2>
-                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Kişi</button>
+                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="hidden-mode text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Kişi</button>
                 </div>
-                <div class="glass-card rounded-[3rem] overflow-hidden border-none">
+                <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[1000px]">
                             <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
@@ -226,9 +274,9 @@
             <section>
                 <div class="flex justify-between items-end mb-8 px-4">
                     <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">✅ Akademik Görevler</h2>
-                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('todos')" class="text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Görev</button>
+                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('todos')" class="hidden-mode text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Görev</button>
                 </div>
-                <div class="glass-card rounded-[3rem] overflow-hidden border-none">
+                <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[800px]">
                             <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
@@ -264,25 +312,8 @@
         };
 
         const appId = 'tezz-prod-v1';
-        
-        const initialStats = [
-            { title: 'Hocalar', completed: 11, total: 11, emoji: '👨‍🏫', order: 1 },
-            { title: 'STK (Sivil Toplum)', completed: 5, total: 6, emoji: '🌳', order: 2 },
-            { title: 'Bürokratlar', completed: 4, total: 4, emoji: '🏛️', order: 3 },
-            { title: 'Siyasi Partiler', completed: 2, total: 6, emoji: '💼', order: 4 },
-            { title: 'Enerji Sektörü', completed: 1, total: 4, emoji: '⚡', order: 5 },
-            { title: 'Gazeteciler', completed: 0, total: 2, emoji: '🎤', order: 6 }
-        ];
+        let isAdmin = false;
 
-        const initialTodos = [
-            "Tez komple toparlanacak", "Yöntem kısmı yazılacak", "Analiz videoları izlenecek", "MAXQDA sorunu çözülecek",
-            "Kavramsal çerçeveye sürdürülebilirlik eklemlenecek", "Hocanın söylediği akademisyenlerle görüşülecek",
-            "Bakanlık izin yazısı yazdırılıp takip edilecek", "STK’larla yeniden iletişime geçilecek",
-            "Milletvekilleriyle yeniden iletişime geçilecek", "Şirketlerle iletişime geçilecek",
-            "İklim gazetecileriyle iletişime geçilecek", "BAP talepleri halledilecek"
-        ];
-
-        // Geri Sayım Verileri
         const deadlines = [
             { label: 'Savunma Günü', date: '2026-06-15', emoji: '🎓' },
             { label: 'Tez Bitişi', date: '2026-06-01', emoji: '📚' },
@@ -292,7 +323,7 @@
         ];
 
         let db, auth, radarChart;
-        let stats = [], contacts = [], todos = [];
+        let stats = [], contacts = [], todos = [], quotes = [];
 
         const startApp = async () => {
             const app = initializeApp(firebaseConfig);
@@ -301,6 +332,7 @@
             await signInAnonymously(auth);
             onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
             renderCountdowns();
+            updateUIForMode();
         };
 
         const setupListeners = () => {
@@ -313,76 +345,105 @@
                 renderContacts();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), (snap) => {
-                if (snap.empty) { window.seedInitialTodos(); return; }
                 todos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
                 renderTodos();
             });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sozler'), (snap) => {
+                quotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderQuotesAdmin();
+                displayRandomQuote();
+            });
         };
 
-        // --- COUNTDOWN LOGIC ---
-        function renderCountdowns() {
-            const list = document.getElementById('countdown-list');
-            list.innerHTML = '';
-            const now = new Date();
-
-            deadlines.forEach(item => {
-                const target = new Date(item.date);
-                const diffTime = target - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
-                let colorClass = 'text-slate-600';
-                if (diffDays <= 30) colorClass = 'text-rose-500 font-black';
-                else if (diffDays <= 90) colorClass = 'text-indigo-600 font-bold';
-
-                const div = document.createElement('div');
-                div.className = 'countdown-item';
-                div.innerHTML = `
-                    <span class="text-xs">${item.emoji}</span>
-                    <span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${item.label}</span>
-                    <span class="text-xs ${colorClass}">${diffDays > 0 ? diffDays + ' gün' : 'Süre Doldu'}</span>
-                `;
-                list.appendChild(div);
-            });
+        function displayRandomQuote() {
+            const el = document.getElementById('ata-quote');
+            if (quotes.length > 0) {
+                const random = quotes[Math.floor(Math.random() * quotes.length)];
+                el.innerText = `"${random.text}"`;
+            } else {
+                el.innerText = '"Yalnız tek bir şeye ihtiyacımız vardır, çalışkan olmak."';
+            }
         }
 
-        // --- COLORS LOGIC ---
-        function getSuccessTheme(perc) {
-            if (perc >= 90) return { class: 'glow-bright-gold text-yellow-400', label: 'Efsane!' };
-            if (perc >= 70) return { class: 'glow-gold text-yellow-600', label: 'Harika!' };
-            if (perc < 40) return { class: 'text-slate-900 opacity-90', label: 'Hızlanmalısın' };
-            return { class: 'text-indigo-600', label: 'İyi Gidiyor' };
+        function renderQuotesAdmin() {
+            const list = document.getElementById('quote-manager-list');
+            if(!list) return;
+            list.innerHTML = quotes.map(q => `
+                <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl relative group text-left">
+                    <p class="text-[11px] text-slate-600 italic pr-8">"${q.text}"</p>
+                    <button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition-all font-bold text-[9px]">SİL</button>
+                </div>
+            `).join('');
         }
 
-        function getGroupColor(perc, completed) {
-            if (perc === 100) return 'text-emerald-500';
-            if (completed === 0) return 'text-rose-500';
-            return 'text-indigo-600';
+        window.addQuoteToCloud = async () => {
+            if(!isAdmin) return;
+            const text = document.getElementById('new-quote-text').value;
+            if(!text) return alert("Söz boş olamaz!");
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', `q-${Date.now()}`), { text, createdAt: Date.now() });
+            document.getElementById('new-quote-text').value = '';
+        };
+
+        window.deleteQuote = async (id) => { if(isAdmin && confirm('Söz silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', id)); };
+
+        window.handleAuth = () => {
+            if (!isAdmin) {
+                const pass = prompt("Yönetici şifresini girin:");
+                if (pass === "531") { isAdmin = true; updateUIForMode(); }
+                else alert("Hatalı şifre!");
+            } else {
+                isAdmin = false;
+                if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
+                updateUIForMode();
+            }
+        };
+
+        function updateUIForMode() {
+            const status = document.getElementById('mode-status');
+            const icon = document.getElementById('mode-icon');
+            const text = document.getElementById('mode-text');
+            const btn = document.getElementById('btn-login-toggle');
+            const masterBtn = document.getElementById('btn-master-manage');
+            const hiddenElements = document.querySelectorAll('.hidden-mode');
+
+            if (isAdmin) {
+                status.className = "mode-indicator mode-admin";
+                icon.innerText = "🛡️"; text.innerText = "Yönetici Aktif";
+                btn.innerText = "Güvenli Çıkış";
+                masterBtn.classList.remove('hidden-mode');
+                hiddenElements.forEach(el => el.classList.remove('hidden-mode'));
+            } else {
+                status.className = "mode-indicator mode-guest";
+                icon.innerText = "👤"; text.innerText = "Misafir Modu";
+                btn.innerText = "Yönetici Girişi";
+                masterBtn.classList.add('hidden-mode');
+            }
+            renderContacts(); renderTodos();
         }
 
-        // --- RENDERS ---
         function renderDash() {
             const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
             if(!container || !summary) return;
             container.innerHTML = '';
             let tDone = 0, tTarget = 0;
-
             stats.forEach(item => {
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
-                const groupColor = getGroupColor(perc, item.completed);
-                
+                const color = perc === 100 ? 'text-emerald-500' : (item.completed === 0 ? 'text-rose-500' : 'text-indigo-600');
                 const card = document.createElement('div');
-                card.className = 'glass-card rounded-[2.5rem] p-8';
+                card.className = 'glass-card rounded-[2.5rem] p-8 text-left';
                 let icons = '';
                 for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji}</span>`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h3 class="font-black text-slate-800 text-lg">${item.title}</h3><p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">${item.completed}/${item.total} KİŞİ</p></div><span class="text-3xl font-black ${groupColor}">${perc}%</span></div><div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${perc === 100 ? 'bg-emerald-500' : (item.completed === 0 ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600')} transition-all duration-1000" style="width:${perc}%"></div></div>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h3 class="font-black text-slate-800 text-lg">${item.title}</h3><p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">${item.completed}/${item.total}</p></div><span class="text-3xl font-black ${color}">${perc}%</span></div><div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${perc === 100 ? 'bg-emerald-500' : (item.completed === 0 ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600')} transition-all duration-1000" style="width:${perc}%"></div></div>`;
                 container.appendChild(card);
             });
-
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
-            const theme = getSuccessTheme(overall);
-            summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Genel Başarı</p><p class="text-5xl font-black ${theme.class} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${theme.label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grup</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
+            let theme = { class: 'text-indigo-600', label: 'İyi Gidiyor' };
+            if (overall >= 90) theme = { class: 'glow-bright-gold text-yellow-400', label: 'Efsane!' };
+            else if (overall >= 70) theme = { class: 'glow-gold text-yellow-600', label: 'Harika!' };
+            else if (overall < 40) theme = { class: 'text-critical', label: 'Hızlanmalısın' };
+            summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Başarı</p><p class="text-5xl font-black ${theme.class} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${theme.label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grup</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
         }
 
         function renderContacts() {
@@ -391,8 +452,9 @@
             body.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-16 text-center text-slate-300 italic">Henüz kimse eklenmedi.</td></tr>' : '';
             contacts.forEach(c => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-indigo-50/50 transition-colors text-sm';
-                tr.innerHTML = `<td class="px-8 py-6 font-bold text-slate-800">${c.name}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">${c.type}</span></td><td class="px-8 py-6 text-slate-500 font-medium">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td><td class="px-8 py-6 text-slate-500">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td><td class="px-8 py-6 max-w-[200px] text-xs text-slate-400 italic">${c.note || '-'}</td><td class="px-8 py-6 text-right space-x-3"><button onclick="window.editContact('${c.id}')" class="text-indigo-600 hover:text-indigo-800 font-black text-[10px] uppercase cursor-pointer">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 hover:text-rose-600 font-black text-[10px] uppercase cursor-pointer">SİL</button></td>`;
+                tr.className = 'hover:bg-indigo-50/50 transition-colors text-sm text-left';
+                const actionBtns = isAdmin ? `<button onclick="window.editContact('${c.id}')" class="text-indigo-600 hover:text-indigo-800 font-black text-[10px] uppercase cursor-pointer mr-3">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 hover:text-rose-600 font-black text-[10px] uppercase cursor-pointer">SİL</button>` : `<span class="text-[9px] font-bold text-slate-300 italic">Salt Okunur</span>`;
+                tr.innerHTML = `<td class="px-8 py-6 font-bold text-slate-800">${c.name}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${c.type}</span></td><td class="px-8 py-6 text-slate-500 font-medium">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td><td class="px-8 py-6 text-slate-500">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td><td class="px-8 py-6 max-w-[200px] text-sm important-note italic">${c.note || '-'}</td><td class="px-8 py-6 text-right">${actionBtns}</td>`;
                 body.appendChild(tr);
             });
         }
@@ -403,20 +465,20 @@
             body.innerHTML = '';
             todos.forEach(t => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors text-sm';
+                tr.className = 'hover:bg-slate-50 transition-colors text-sm text-left';
                 const statusClass = t.status === 'Yapıldı' ? 'badge-done' : (t.status === 'Diğer' ? 'badge-other' : 'badge-pending');
-                tr.innerHTML = `<td class="px-8 py-6 text-slate-800 font-bold">${t.task}</td><td class="px-8 py-6"><select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-white border border-slate-100 p-2 rounded-xl status-badge ${statusClass} font-black cursor-pointer outline-none"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select></td><td class="px-8 py-6"><input type="text" value="${t.desc || ''}" placeholder="Detay ekle..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b-2 border-slate-100 focus:border-indigo-400 outline-none w-full text-xs text-slate-400 italic py-1"></td><td class="px-8 py-6 text-right"><button onclick="window.deleteTodo('${t.id}')" class="text-rose-300 hover:text-rose-500 font-black text-[10px] uppercase cursor-pointer">SİL</button></td>`;
+                const actionBtn = isAdmin ? `<button onclick="window.deleteTodo('${t.id}')" class="text-rose-300 hover:text-rose-500 font-black text-[10px] uppercase cursor-pointer">SİL</button>` : `<span class="text-[9px] font-bold text-slate-300 italic">Salt Okunur</span>`;
+                const statusSelect = isAdmin ? `<select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-white border border-slate-100 p-2 rounded-xl status-badge ${statusClass} font-black cursor-pointer outline-none"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select>` : `<span class="status-badge ${statusClass}">${t.status}</span>`;
+                const descInput = isAdmin ? `<input type="text" value="${t.desc || ''}" placeholder="Detay ekle..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b-2 border-slate-100 focus:border-indigo-400 outline-none w-full text-sm important-note italic py-1">` : `<span class="text-sm important-note italic">${t.desc || '-'}</span>`;
+                tr.innerHTML = `<td class="px-8 py-6 text-slate-800 font-bold">${t.task}</td><td class="px-8 py-6">${statusSelect}</td><td class="px-8 py-6">${descInput}</td><td class="px-8 py-6 text-right">${actionBtn}</td>`;
                 body.appendChild(tr);
             });
         }
 
-        // --- ACTIONS ---
         window.addContactToCloud = async () => {
+            if(!isAdmin) return;
             const id = document.getElementById('contact-edit-id').value;
-            const name = document.getElementById('contact-name').value;
-            const type = document.getElementById('contact-type').value;
-            if(!name || !type) return alert("İsim ve Kategori girilmeli!");
-            const cData = { name, type, email: document.getElementById('contact-email').value, phone: document.getElementById('contact-phone').value, refName: document.getElementById('contact-ref-name').value, refPhone: document.getElementById('contact-ref-phone').value, note: document.getElementById('contact-note').value, updatedAt: Date.now() };
+            const cData = { name: document.getElementById('contact-name').value, type: document.getElementById('contact-type').value, email: document.getElementById('contact-email').value, phone: document.getElementById('contact-phone').value, refName: document.getElementById('contact-ref-name').value, refPhone: document.getElementById('contact-ref-phone').value, note: document.getElementById('contact-note').value, updatedAt: Date.now() };
             if(id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id), cData);
             else { cData.createdAt = Date.now(); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', `c-${Date.now()}`), cData); }
             window.resetContactForm();
@@ -448,58 +510,60 @@
         };
 
         window.addTodoToCloud = async () => {
+            if(!isAdmin) return;
             const task = document.getElementById('todo-task').value;
-            if(!task) return alert("Görev girilmeli!");
+            if(!task) return;
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `t-${Date.now()}`), { task, status: document.getElementById('todo-status').value, desc: document.getElementById('todo-desc').value, createdAt: Date.now() });
             document.getElementById('todo-task').value = ''; document.getElementById('todo-desc').value = '';
         };
 
-        window.updateTodoStatus = async (id, status) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { status });
-        window.updateTodoDesc = async (id, desc) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { desc });
-        window.deleteTodo = async (id) => confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id));
-        window.deleteContact = async (id) => confirm('Kişi silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
+        window.updateTodoStatus = async (id, status) => { if(isAdmin) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { status }); };
+        window.updateTodoDesc = async (id, desc) => { if(isAdmin) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), { desc }); };
+        window.deleteTodo = async (id) => isAdmin && confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id));
+        window.deleteContact = async (id) => isAdmin && confirm('Kişi silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
 
-        window.seedInitialTodos = async () => {
-            if(!confirm('Tüm akademik görevler sıfırlanacak?')) return;
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'));
-            for(const d of snap.docs) await deleteDoc(d.ref);
-            for(let i=0; i<initialTodos.length; i++) {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `init-${i}`), { task: initialTodos[i], status: 'Yapılmadı', desc: '', createdAt: Date.now() + i });
-            }
-        };
-
-        window.seedDataToCloud = async () => {
-            if(!confirm('İstatistikler sıfırlanacak?')) return;
-            const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'));
-            for(const d of snap.docs) await deleteDoc(d.ref);
-            for (const item of initialStats) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', item.title.toLowerCase().replace(/\s/g,'-')), item);
-        };
-
-        window.addNewCategory = async () => await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', `cat-${Date.now()}`), { title: 'Yeni', completed: 0, total: 5, emoji: '📌', order: stats.length + 1 });
-        window.updateValue = async (id, field, value) => await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { [field]: (field === 'completed' || field === 'total' ? parseInt(value) || 0 : value) });
-        window.removeCategory = async (id) => confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
-
-        // --- UTILS ---
         window.switchSidebarTab = (tab) => {
-            ['stats', 'contacts', 'todos'].forEach(t => {
+            ['stats', 'contacts', 'todos', 'quotes'].forEach(t => {
                 document.getElementById(`tab-${t}`).className = `tab-btn flex-1 text-center ${t === tab ? 'active' : 'inactive'}`;
                 document.getElementById(`sidebar-${t}-content`).className = t === tab ? '' : 'hidden';
             });
         };
-        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        
+        window.toggleAdmin = () => {
+            if(!isAdmin) {
+                const pass = prompt("Şifre:");
+                if(pass === "531") { isAdmin = true; updateUIForMode(); }
+                else return;
+            }
+            document.getElementById('admin-panel').classList.toggle('translate-x-full');
+        };
+        function renderCountdowns() {
+            const list = document.getElementById('countdown-list');
+            list.innerHTML = '';
+            const now = new Date();
+            deadlines.forEach(item => {
+                const target = new Date(item.date);
+                const diffTime = target - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                let colorClass = 'text-slate-600';
+                if (diffDays <= 30) colorClass = 'text-rose-500 font-black';
+                else if (diffDays <= 90) colorClass = 'text-indigo-600 font-bold';
+                const div = document.createElement('div');
+                div.className = 'countdown-item';
+                div.innerHTML = `<span class="text-xs">${item.emoji}</span><span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${item.label}</span><span class="text-xs ${colorClass}">${diffDays > 0 ? diffDays + ' gün' : 'Bitti'}</span>`;
+                list.appendChild(div);
+            });
+        }
         function updateContactDropdown() {
             const select = document.getElementById('contact-type');
             if(!select) return;
             const cur = select.value;
-            select.innerHTML = '<option value="">Kategori Seç...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
+            select.innerHTML = '<option value="">Kategori...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
             select.value = cur;
         }
-
         function renderStatsEditor() {
             const list = document.getElementById('editor-list');
             if(!list) return;
-            list.innerHTML = stats.map(i => `<div class="p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] relative shadow-sm">
+            list.innerHTML = stats.map(i => `<div class="p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] relative text-left">
                 <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold border-none bg-transparent cursor-pointer">Sil</button>
                 <div class="space-y-3">
                     <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kategori</label><input type="text" value="${i.title}" class="custom-input" onchange="window.updateValue('${i.id}', 'title', this.value)"></div>
@@ -510,7 +574,6 @@
                 </div>
             </div>`).join('');
         }
-
         function updateRadar() {
             const canvas = document.getElementById('radarChart');
             if(!canvas) return;
