@@ -528,10 +528,15 @@
             todos.forEach(t => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors text-sm text-left';
+                
                 const statusClass = t.status === 'Yapıldı' ? 'badge-done' : (t.status === 'Diğer' ? 'badge-other' : 'badge-pending');
                 const actionBtn = isAdmin ? `<button onclick="window.deleteTodo('${t.id}')" class="text-rose-300 hover:text-rose-500 font-black text-[10px] uppercase cursor-pointer">SİL</button>` : `<span class="text-[9px] font-bold text-slate-300 italic font-bold">Salt Okunur</span>`;
                 const statusSelect = isAdmin ? `<select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-white border border-slate-100 p-2 rounded-xl status-badge ${statusClass} font-black cursor-pointer outline-none"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select>` : `<span class="status-badge ${statusClass}">${t.status}</span>`;
-                const descInput = isAdmin ? `<input type="text" value="${t.desc || ''}" placeholder="Detay ekle..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b-2 border-slate-100 focus:border-indigo-400 outline-none w-full text-sm important-note italic py-1">` : `<span class="text-sm important-note italic">${t.desc || '-'}</span>`;
+                
+                // GÖREV NOTU MASKELEME (YENİ)
+                const descDisp = isAdmin ? (t.desc || '-') : '**********';
+                const descInput = isAdmin ? `<input type="text" value="${t.desc || ''}" placeholder="Detay ekle..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b-2 border-slate-100 focus:border-indigo-400 outline-none w-full text-sm important-note italic py-1">` : `<span class="text-sm important-note italic">${descDisp}</span>`;
+                
                 tr.innerHTML = `<td class="px-8 py-6 text-slate-800 font-bold">${t.task}</td><td class="px-8 py-6">${statusSelect}</td><td class="px-8 py-6">${descInput}</td><td class="px-8 py-6 text-right">${actionBtn}</td>`;
                 body.appendChild(tr);
             });
