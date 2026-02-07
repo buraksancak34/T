@@ -110,18 +110,31 @@
 
         .hidden-mode { display: none !important; }
 
+        /* Notlar Kısmı - NET KIRMIZI */
         .important-note {
             color: #ef4444 !important;
-            font-weight: 600 !important;
+            font-weight: 800 !important;
             opacity: 1 !important;
+            font-style: normal !important;
         }
 
-        #ata-quote-container {
-            min-height: 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        /* Atatürk Sözü Animasyonu */
+        #ata-quote-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 80px;
+            width: 100%;
         }
+
+        .quote-slide {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        .quote-enter { transform: translateX(100%); opacity: 0; }
+        .quote-active { transform: translateX(0); opacity: 1; }
+        .quote-exit { transform: translateX(-100%); opacity: 0; }
     </style>
 </head>
 <body class="antialiased">
@@ -140,14 +153,15 @@
             <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1">Sözler</button>
         </div>
         
+        <!-- Sayılar -->
         <div id="sidebar-stats-content">
             <div id="editor-list" class="space-y-5 mb-8"></div>
             <div class="pt-8 border-t border-slate-100 space-y-3">
                 <button onclick="window.addNewCategory()" class="w-full py-4 btn-action rounded-2xl text-sm font-bold shadow-xl border-none">+ Yeni Kategori</button>
-                <button onclick="window.seedDataToCloud()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase">Sayıları Sıfırla</button>
             </div>
         </div>
 
+        <!-- Kişiler -->
         <div id="sidebar-contacts-content" class="hidden space-y-5">
             <div class="flex justify-between items-center">
                 <h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="contact-form-title">Yeni Kayıt</h3>
@@ -169,6 +183,7 @@
             </div>
         </div>
 
+        <!-- Görevler -->
         <div id="sidebar-todos-content" class="hidden space-y-5">
             <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Görev Planlayıcı</h3>
             <div class="space-y-4">
@@ -184,17 +199,13 @@
             </div>
         </div>
 
+        <!-- Sözler -->
         <div id="sidebar-quotes-content" class="hidden space-y-5">
-            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Atatürk Sözleri Havuzu</h3>
+            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Söz Havuzu</h3>
             <div class="space-y-4">
-                <textarea id="new-quote-text" placeholder="Yeni vecize ekleyin..." class="custom-input h-24"></textarea>
+                <textarea id="new-quote-text" placeholder="Yeni bir söz ekleyin..." class="custom-input h-24"></textarea>
                 <button onclick="window.addQuoteToCloud()" class="w-full py-4 btn-action rounded-2xl font-black text-sm">SÖZ EKLE</button>
-                
-                <div class="pt-8 border-t border-slate-100">
-                    <label class="text-[10px] font-black text-slate-400 uppercase mb-4 block">Mevcut Sözler</label>
-                    <div id="quote-manager-list" class="space-y-3"></div>
-                </div>
-                <button onclick="window.seedQuotesToCloud()" class="w-full py-2 text-slate-300 text-[9px] font-bold uppercase mt-6">Sözleri Başlangıca Döndür</button>
+                <div id="quote-manager-list" class="pt-4 space-y-3"></div>
             </div>
         </div>
     </div>
@@ -207,7 +218,7 @@
                 </h1>
                 <p id="sub-title" class="text-slate-400 text-lg mt-3 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
                 
-                <div class="mt-6 flex flex-col gap-5 items-center md:items-start">
+                <div class="mt-6 flex flex-col gap-6 items-center md:items-start w-full">
                     <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
                         <div id="mode-status" class="mode-indicator mode-guest">
                             <span id="mode-icon">👤</span>
@@ -220,9 +231,11 @@
                         </button>
                     </div>
 
-                    <!-- Atatürk Sözü Bölümü -->
-                    <div id="ata-quote-container" class="max-w-xl">
-                        <p id="ata-quote" class="text-slate-700 text-sm font-medium italic leading-relaxed border-l-4 border-indigo-400 pl-5 py-2"></p>
+                    <!-- Atatürk Sözü Bölümü (Kayan) -->
+                    <div id="ata-quote-container" class="max-w-xl w-full">
+                        <div id="ata-quote-wrapper">
+                            <!-- JS ile kayan sözler buraya gelecek -->
+                        </div>
                         <p id="ata-author" class="text-indigo-500 text-[10px] font-black uppercase tracking-widest mt-2 pl-5">Mustafa Kemal Atatürk</p>
                     </div>
                 </div>
@@ -238,7 +251,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-24">
             <div class="lg:col-span-5 glass-card p-10 rounded-[3rem] flex flex-col items-center">
-                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-[3px] mb-8">Ağ Dengesi Analizi</h3>
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-[3px] mb-8 text-center w-full">Ağ Dengesi Analizi</h3>
                 <div class="chart-container"><canvas id="radarChart"></canvas></div>
             </div>
             <div class="lg:col-span-7">
@@ -298,7 +311,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -313,6 +326,8 @@
 
         const appId = 'tezz-prod-v1';
         let isAdmin = false;
+        let quoteInterval = null;
+        let currentQuoteIndex = 0;
 
         const deadlines = [
             { label: 'Savunma Günü', date: '2026-06-15', emoji: '🎓' },
@@ -330,14 +345,19 @@
             db = getFirestore(app);
             auth = getAuth(app);
             await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
+            
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    await checkAdminStatus(user.uid);
+                    setupListeners();
+                }
+            });
             renderCountdowns();
-            updateUIForMode();
         };
 
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), (snap) => {
-                stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.order - b.order);
+                stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
                 renderDash(); renderStatsEditor(); updateRadar(); updateContactDropdown();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), (snap) => {
@@ -351,50 +371,83 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sozler'), (snap) => {
                 quotes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderQuotesAdmin();
-                displayRandomQuote();
+                startQuoteRotation();
             });
         };
 
-        function displayRandomQuote() {
-            const el = document.getElementById('ata-quote');
-            if (quotes.length > 0) {
-                const random = quotes[Math.floor(Math.random() * quotes.length)];
-                el.innerText = `"${random.text}"`;
-            } else {
-                el.innerText = '"Yalnız tek bir şeye ihtiyacımız vardır, çalışkan olmak."';
+        // --- ATATURK QUOTE SLIDER LOGIC ---
+        function startQuoteRotation() {
+            if (quoteInterval) clearInterval(quoteInterval);
+            if (quotes.length === 0) return;
+
+            displayNextQuote();
+            quoteInterval = setInterval(displayNextQuote, 15000); // 15 Saniyede Bir
+        }
+
+        function displayNextQuote() {
+            const wrapper = document.getElementById('ata-quote-wrapper');
+            if (!wrapper) return;
+
+            const nextIndex = (currentQuoteIndex + 1) % quotes.length;
+            const currentQuoteText = quotes[currentQuoteIndex]?.text || "";
+            const nextQuoteText = quotes[nextIndex]?.text || "";
+
+            // Yeni söz elementi oluştur
+            const nextQuoteEl = document.createElement('p');
+            nextQuoteEl.className = 'quote-slide quote-enter text-slate-700 text-sm font-semibold italic leading-relaxed border-l-4 border-indigo-400 pl-5 py-2';
+            nextQuoteEl.innerText = `"${nextQuoteText}"`;
+            
+            wrapper.appendChild(nextQuoteEl);
+
+            // Mevcut olanı çıkar, yeniyi merkeze getir
+            setTimeout(() => {
+                const currentEl = wrapper.querySelector('.quote-active');
+                if (currentEl) {
+                    currentEl.classList.replace('quote-active', 'quote-exit');
+                    setTimeout(() => currentEl.remove(), 800);
+                }
+                nextQuoteEl.classList.replace('quote-enter', 'quote-active');
+            }, 50);
+
+            currentQuoteIndex = nextIndex;
+        }
+
+        // --- ADMIN PERSISTENCE ---
+        async function checkAdminStatus(userId) {
+            const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'permissions', 'adminStatus'));
+            if (adminDoc.exists() && adminDoc.data().isAuthorized === true) {
+                isAdmin = true;
             }
+            updateUIForMode();
         }
 
-        function renderQuotesAdmin() {
-            const list = document.getElementById('quote-manager-list');
-            if(!list) return;
-            list.innerHTML = quotes.map(q => `
-                <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl relative group text-left">
-                    <p class="text-[11px] text-slate-600 italic pr-8">"${q.text}"</p>
-                    <button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition-all font-bold text-[9px]">SİL</button>
-                </div>
-            `).join('');
+        async function saveAdminStatus(isAuthorized) {
+            if (!auth.currentUser) return;
+            await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'permissions', 'adminStatus'), { 
+                isAuthorized: isAuthorized,
+                updatedAt: Date.now()
+            });
         }
 
-        window.addQuoteToCloud = async () => {
-            if(!isAdmin) return;
-            const text = document.getElementById('new-quote-text').value;
-            if(!text) return alert("Söz boş olamaz!");
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', `q-${Date.now()}`), { text, createdAt: Date.now() });
-            document.getElementById('new-quote-text').value = '';
-        };
-
-        window.deleteQuote = async (id) => { if(isAdmin && confirm('Söz silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', id)); };
-
-        window.handleAuth = () => {
+        window.handleAuth = async () => {
             if (!isAdmin) {
                 const pass = prompt("Yönetici şifresini girin:");
-                if (pass === "531") { isAdmin = true; updateUIForMode(); }
-                else alert("Hatalı şifre!");
+                if (pass === "531") {
+                    isAdmin = true;
+                    await saveAdminStatus(true);
+                    updateUIForMode();
+                } else {
+                    alert("Hatalı şifre!");
+                }
             } else {
-                isAdmin = false;
-                if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
-                updateUIForMode();
+                if (confirm("Yönetici oturumunu kapatmak istediğinize emin misiniz?")) {
+                    isAdmin = false;
+                    await saveAdminStatus(false);
+                    if(!document.getElementById('admin-panel').classList.contains('translate-x-full')) {
+                        document.getElementById('admin-panel').classList.add('translate-x-full');
+                    }
+                    updateUIForMode();
+                }
             }
         };
 
@@ -421,6 +474,7 @@
             renderContacts(); renderTodos();
         }
 
+        // --- RENDERS ---
         function renderDash() {
             const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
@@ -434,7 +488,7 @@
                 const card = document.createElement('div');
                 card.className = 'glass-card rounded-[2.5rem] p-8 text-left';
                 let icons = '';
-                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji}</span>`;
+                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji || '📌'}</span>`;
                 card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h3 class="font-black text-slate-800 text-lg">${item.title}</h3><p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">${item.completed}/${item.total}</p></div><span class="text-3xl font-black ${color}">${perc}%</span></div><div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${perc === 100 ? 'bg-emerald-500' : (item.completed === 0 ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600')} transition-all duration-1000" style="width:${perc}%"></div></div>`;
                 container.appendChild(card);
             });
@@ -474,6 +528,19 @@
                 body.appendChild(tr);
             });
         }
+
+        function renderQuotesAdmin() {
+            const list = document.getElementById('quote-manager-list');
+            if(!list) return;
+            list.innerHTML = quotes.map(q => `<div class="p-4 bg-slate-50 border border-slate-100 rounded-xl relative group text-left"><p class="text-[11px] text-slate-600 italic pr-8">"${q.text}"</p><button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 opacity-0 group-hover:opacity-100 transition-all font-bold text-[9px] cursor-pointer">SİL</button></div>`).join('');
+        }
+
+        // --- UPDATE ACTIONS ---
+        window.updateValue = async (id, field, value) => {
+            if(!isAdmin) return;
+            const val = (field === 'completed' || field === 'total') ? parseInt(value) || 0 : value;
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id), { [field]: val });
+        };
 
         window.addContactToCloud = async () => {
             if(!isAdmin) return;
@@ -522,20 +589,33 @@
         window.deleteTodo = async (id) => isAdmin && confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id));
         window.deleteContact = async (id) => isAdmin && confirm('Kişi silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
 
+        window.addQuoteToCloud = async () => {
+            if(!isAdmin) return;
+            const text = document.getElementById('new-quote-text').value;
+            if(!text) return;
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', `q-${Date.now()}`), { text, createdAt: Date.now() });
+            document.getElementById('new-quote-text').value = '';
+        };
+
+        window.deleteQuote = async (id) => { if(isAdmin && confirm('Söz silinsin mi?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'sozler', id)); };
+
+        // --- UTILS ---
         window.switchSidebarTab = (tab) => {
             ['stats', 'contacts', 'todos', 'quotes'].forEach(t => {
                 document.getElementById(`tab-${t}`).className = `tab-btn flex-1 text-center ${t === tab ? 'active' : 'inactive'}`;
                 document.getElementById(`sidebar-${t}-content`).className = t === tab ? '' : 'hidden';
             });
         };
+
         window.toggleAdmin = () => {
             if(!isAdmin) {
-                const pass = prompt("Şifre:");
-                if(pass === "531") { isAdmin = true; updateUIForMode(); }
+                const pass = prompt("Yönetici Şifresi:");
+                if(pass === "531") { isAdmin = true; saveAdminStatus(true); updateUIForMode(); }
                 else return;
             }
             document.getElementById('admin-panel').classList.toggle('translate-x-full');
         };
+
         function renderCountdowns() {
             const list = document.getElementById('countdown-list');
             list.innerHTML = '';
@@ -553,27 +633,30 @@
                 list.appendChild(div);
             });
         }
+
         function updateContactDropdown() {
             const select = document.getElementById('contact-type');
             if(!select) return;
             const cur = select.value;
-            select.innerHTML = '<option value="">Kategori...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
+            select.innerHTML = '<option value="">Kategori Seç...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
             select.value = cur;
         }
+
         function renderStatsEditor() {
             const list = document.getElementById('editor-list');
             if(!list) return;
             list.innerHTML = stats.map(i => `<div class="p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] relative text-left">
                 <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold border-none bg-transparent cursor-pointer">Sil</button>
                 <div class="space-y-3">
-                    <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kategori</label><input type="text" value="${i.title}" class="custom-input" onchange="window.updateValue('${i.id}', 'title', this.value)"></div>
+                    <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kategori</label><input type="text" value="${i.title}" class="custom-input" onblur="window.updateValue('${i.id}', 'title', this.value)"></div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Biten</label><input type="number" value="${i.completed}" class="custom-input" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div>
-                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Hedef</label><input type="number" value="${i.total}" class="custom-input" onchange="window.updateValue('${i.id}', 'total', this.value)"></div>
+                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Biten</label><input type="number" value="${i.completed}" class="custom-input" onblur="window.updateValue('${i.id}', 'completed', this.value)"></div>
+                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Hedef</label><input type="number" value="${i.total}" class="custom-input" onblur="window.updateValue('${i.id}', 'total', this.value)"></div>
                     </div>
                 </div>
             </div>`).join('');
         }
+
         function updateRadar() {
             const canvas = document.getElementById('radarChart');
             if(!canvas) return;
@@ -581,6 +664,9 @@
             if(radarChart) radarChart.destroy();
             radarChart = new Chart(ctx, { type: 'radar', data: { labels: stats.map(d => d.title), datasets: [{ label: '% Başarı', data: stats.map(d => (d.completed/d.total)*100), backgroundColor: 'rgba(99, 102, 241, 0.15)', borderColor: '#6366f1', borderWidth: 3, pointBackgroundColor: '#fff', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#f1f5f9' }, grid: { color: '#f1f5f9' }, pointLabels: { color: '#64748b', font: { size: 10, weight: '700', family: 'Plus Jakarta Sans' } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } } });
         }
+
+        window.addNewCategory = async () => isAdmin && await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', `cat-${Date.now()}`), { title: 'Yeni', completed: 0, total: 5, emoji: '📌', order: stats.length + 1 });
+        window.removeCategory = async (id) => isAdmin && confirm('Silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
 
         startApp();
     </script>
