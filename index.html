@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360° Görüşme Analiz Portalı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        .admin-sidebar {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -15px 0 35px rgba(0,0,0,0.5);
+            z-index: 999999;
+        }
+
+        .custom-input {
+            background: #1e293b !important;
+            border: 1px solid #334155 !important;
+            color: white !important;
+            padding: 8px !important;
+            border-radius: 8px !important;
+            width: 100% !important;
+            font-size: 14px !important;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 500px; 
+            margin: auto;
+            height: 350px;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Veri Düzenleme Paneli (Sidebar) -->
+    <div id="admin-panel" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-700 p-6 admin-sidebar translate-x-full">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold flex items-center text-white m-0">
+                <span class="mr-2">⚙️</span> Verileri Yönet
+            </h2>
+            <button onclick="toggleAdmin()" class="text-slate-400 hover:text-white text-2xl border-none bg-transparent cursor-pointer">&times;</button>
+        </div>
+        
+        <div id="editor-list" class="space-y-6 overflow-y-auto max-h-[calc(100vh-220px)] pr-2 custom-scroll text-white text-left">
+            <!-- JavaScript ile doldurulacak -->
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-slate-700 space-y-3 text-left">
+            <button onclick="addNewCategory()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-bold text-white transition-all cursor-pointer border-none">
+                + Yeni Kategori Ekle
+            </button>
+            <button onclick="resetToInitial()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-xs text-slate-400 transition-all cursor-pointer">
+                Tüm Verileri Sıfırla
+            </button>
+        </div>
+    </div>
+
+    <div class="p-4 md:p-10 max-w-7xl mx-auto">
+        <header class="text-center mb-12 relative">
+            <div class="absolute top-0 right-0 z-10">
+                <button onclick="toggleAdmin()" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-4 py-2 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer">
+                    🛠️ Düzenle
+                </button>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter m-0 uppercase">
+                Görüşme İlerleme Paneli
+            </h1>
+            <p class="text-slate-400 text-lg m-0">360° Profesyonel Ağ Takibi ve Analizi</p>
+            
+            <div class="mt-8 flex flex-wrap justify-center gap-4">
+                <button id="view-toggle-btn" onclick="toggleView()" class="bg-slate-800 text-white border border-slate-700 px-8 py-3 rounded-2xl font-bold hover:bg-slate-700 transition-all cursor-pointer">
+                    Tablo Görünümüne Geç
+                </button>
+            </div>
+        </header>
+
+        <!-- Stratejik Özet Bölümü -->
+        <div class="mb-10">
+            <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- JavaScript ile doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Analiz ve Görselleştirme -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+            <!-- Radar Grafik -->
+            <div class="lg:col-span-5 glass-card p-8 rounded-3xl flex flex-col items-center">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6">Ağ Dengesi (360°)</h3>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Kart Görünümü -->
+            <div class="lg:col-span-7">
+                <div id="card-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                
+                <!-- Tablo Görünümü (Gizli) -->
+                <div id="table-view" class="hidden glass-card rounded-3xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+                                <tr>
+                                    <th class="px-6 py-5">Kategori</th>
+                                    <th class="px-6 py-5 text-center">Hedef</th>
+                                    <th class="px-6 py-5 text-center">Biten</th>
+                                    <th class="px-6 py-5">Görsel</th>
+                                    <th class="px-6 py-5 text-right">Başarı</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Entegrasyonu -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, onSnapshot, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Güvenli Değişken Kontrolü
+        const getEnvVar = (name) => {
+            try { return eval(name); } catch(e) { return null; }
+        };
+
+        const firebaseConfigRaw = getEnvVar('__firebase_config');
+        const firebaseConfig = firebaseConfigRaw ? JSON.parse(firebaseConfigRaw) : null;
+        const appId = getEnvVar('__app_id') || 'gorusme-takip-v2';
+
+        // Varsayılan Veri Seti
+        const initialData = [
+            { id: 'hoca', title: 'Hocalar', completed: 11, total: 11, emoji: '👨‍🏫', order: 1 },
+            { id: 'stk', title: 'STK (Sivil Toplum)', completed: 5, total: 6, emoji: '🌳', order: 2 },
+            { id: 'burokrat', title: 'Bürokratlar', completed: 4, total: 4, emoji: '🏛️', order: 3 },
+            { id: 'siyasi', title: 'Siyasi Partiler', completed: 2, total: 6, emoji: '💼', order: 4 },
+            { id: 'enerji', title: 'Enerji Sektörü', completed: 1, total: 4, emoji: '⚡', order: 5 },
+            { id: 'gazeteci', title: 'Gazeteciler', completed: 0, total: 2, emoji: '🎤', order: 6 }
+        ];
+
+        let data = [...initialData];
+        let radarChart = null;
+        let db = null;
+        let auth = null;
+
+        // --- UYGULAMA BAŞLATMA ---
+        const startApp = async () => {
+            if (firebaseConfig && firebaseConfig.apiKey) {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    await signInAnonymously(auth);
+                    onAuthStateChanged(auth, (user) => {
+                        if (user) setupDataListener();
+                    });
+                } catch (err) {
+                    console.warn("Firebase bağlantı hatası, yerel modda çalışıyor.");
+                    runLocalMode();
+                }
+            } else {
+                runLocalMode();
+            }
+        };
+
+        const runLocalMode = () => {
+            render();
+            updateRadar();
+            renderEditor();
+        };
+
+        const setupDataListener = () => {
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler');
+            onSnapshot(colRef, (snapshot) => {
+                if (snapshot.empty) {
+                    seedInitialData();
+                    return;
+                }
+                data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                data.sort((a, b) => (a.order || 0) - (b.order || 0));
+                render();
+                renderEditor();
+                updateRadar();
+            }, (error) => {
+                console.error("Firestore hatası:", error);
+                runLocalMode();
+            });
+        };
+
+        const seedInitialData = async () => {
+            if (!db) return;
+            for (const item of initialData) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', item.id), item);
+            }
+        };
+
+        // --- AKSİYONLAR ---
+        window.toggleAdmin = () => document.getElementById('admin-panel').classList.toggle('translate-x-full');
+        
+        window.updateValue = async (id, field, value) => {
+            let finalVal = (field === 'completed' || field === 'total') ? parseInt(value) || 0 : value;
+            
+            if (db && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id);
+                    await updateDoc(docRef, { [field]: finalVal });
+                } catch (e) { console.error("Güncelleme hatası:", e); }
+            } else {
+                const idx = data.findIndex(d => d.id === id);
+                if (idx !== -1) {
+                    data[idx][field] = finalVal;
+                    render();
+                    updateRadar();
+                }
+            }
+        };
+
+        window.addNewCategory = async () => {
+            const newId = `cat-${Date.now()}`;
+            const newCat = { title: 'Yeni Kategori', completed: 0, total: 5, emoji: '👤', order: data.length + 1 };
+            
+            if (db && auth.currentUser) {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', newId), newCat);
+            } else {
+                data.push({ id: newId, ...newCat });
+                render(); renderEditor(); updateRadar();
+            }
+        };
+
+        window.deleteCategory = async (id) => {
+            if (!confirm('Kategoriyi silmek istediğinize emin misiniz?')) return;
+            if (db && auth.currentUser) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', id));
+            } else {
+                data = data.filter(d => d.id !== id);
+                render(); renderEditor(); updateRadar();
+            }
+        };
+
+        window.resetToInitial = async () => {
+            if (!confirm('Tüm veriler sıfırlanacak. Emin misiniz?')) return;
+            if (db && auth.currentUser) {
+                const snapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'));
+                for (const d of snapshot.docs) await deleteDoc(d.ref);
+                await seedInitialData();
+            } else {
+                data = JSON.parse(JSON.stringify(initialData));
+                render(); renderEditor(); updateRadar();
+            }
+        };
+
+        window.toggleView = () => {
+            const cv = document.getElementById('card-view');
+            const tv = document.getElementById('table-view');
+            const btn = document.getElementById('view-toggle-btn');
+            const isCard = !cv.classList.contains('hidden');
+            cv.classList.toggle('hidden');
+            tv.classList.toggle('hidden');
+            btn.innerText = isCard ? "Kart Görünümüne Geç" : "Tablo Görünümüne Geç";
+        };
+
+        // --- GÖRSELLEŞTİRME ---
+        function render() {
+            const cards = document.getElementById('card-view');
+            const table = document.getElementById('table-body');
+            const summary = document.getElementById('stats-summary');
+            if(!cards || !table || !summary) return;
+            
+            cards.innerHTML = ''; table.innerHTML = '';
+            let tDone = 0, tTarget = 0;
+
+            data.forEach(item => {
+                const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
+                tDone += item.completed; tTarget += item.total;
+                
+                // Kart Çizimi
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-3xl p-6 text-left';
+                let icons = '';
+                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl inline-block mb-1 ${i < item.completed ? '' : 'opacity-10 grayscale'}">${item.emoji}</span>`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4 text-white">
+                        <div class="text-left">
+                            <h3 class="font-bold text-sm leading-tight m-0">${item.title}</h3>
+                            <p class="text-[9px] opacity-40 uppercase font-bold m-0 mt-1">${item.completed}/${item.total} KİŞİ</p>
+                        </div>
+                        <span class="text-2xl font-black text-indigo-400">${perc}%</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-6 min-h-[40px]">${icons}</div>
+                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="h-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)] transition-all duration-1000" style="width:${perc}%"></div>
+                    </div>
+                `;
+                cards.appendChild(card);
+
+                // Tablo Çizimi
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-800/50 text-white hover:bg-white/5 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-xs">${item.title}</td>
+                    <td class="px-6 py-4 text-center opacity-50 text-xs">${item.total}</td>
+                    <td class="px-6 py-4 text-center font-bold text-xs">${item.completed}</td>
+                    <td class="px-6 py-4 text-lg">${item.emoji}</td>
+                    <td class="px-6 py-4 text-right"><span class="text-indigo-400 font-bold text-xs">%${perc}</span></td>
+                `;
+                table.appendChild(row);
+            });
+
+            // Özet Bölümü
+            const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
+            summary.innerHTML = `
+                <div class="bg-indigo-600 p-5 rounded-3xl text-white shadow-xl flex flex-col justify-center text-center">
+                    <p class="text-[10px] font-bold uppercase opacity-60 m-0">Genel Başarı</p>
+                    <p class="text-3xl font-black m-0 mt-1">%${overall}</p>
+                </div>
+                <div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center">
+                    <p class="opacity-40 text-[10px] font-bold uppercase m-0">Biten</p>
+                    <p class="text-3xl font-black m-0">${tDone}</p>
+                </div>
+                <div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center">
+                    <p class="opacity-40 text-[10px] font-bold uppercase m-0">Kalan</p>
+                    <p class="text-3xl font-black m-0">${tTarget - tDone}</p>
+                </div>
+                <div class="glass-card p-5 rounded-3xl text-white flex flex-col justify-center text-center">
+                    <p class="opacity-40 text-[10px] font-bold uppercase m-0">Grup</p>
+                    <p class="text-3xl font-black m-0">${data.length}</p>
+                </div>
+            `;
+        }
+
+        function renderEditor() {
+            const list = document.getElementById('editor-list');
+            if(!list) return;
+            list.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-slate-800/40 rounded-xl border border-slate-700 space-y-3 relative';
+                div.innerHTML = `
+                    <button onclick="deleteCategory('${item.id}')" class="absolute top-2 right-2 text-rose-500 text-xs bg-transparent border-none cursor-pointer">Sil</button>
+                    <div class="text-left">
+                        <label class="text-[10px] opacity-50 block mb-1">Kategori Adı</label>
+                        <input type="text" value="${item.title}" class="custom-input text-white" onchange="updateValue('${item.id}', 'title', this.value)">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-1">TAMAM</label>
+                            <input type="number" value="${item.completed}" class="custom-input" onchange="updateValue('${item.id}', 'completed', this.value)">
+                        </div>
+                        <div>
+                            <label class="text-[10px] opacity-50 block mb-1">HEDEF</label>
+                            <input type="number" value="${item.total}" class="custom-input" onchange="updateValue('${item.id}, 'total', this.value)">
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function updateRadar() {
+            const canvas = document.getElementById('radarChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(radarChart) radarChart.destroy();
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.map(d => d.title),
+                    datasets: [{
+                        label: 'Başarı %',
+                        data: data.map(d => (d.completed/d.total)*100),
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: '#6366f1',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#6366f1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        r: { 
+                            angleLines: { color: 'rgba(255,255,255,0.05)' }, 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            pointLabels: { color: '#94a3b8', font: { size: 9, weight: '600' } }, 
+                            ticks: { display: false }, 
+                            suggestedMin: 0, 
+                            suggestedMax: 100 
+                        } 
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Başlat
+        window.addEventListener('DOMContentLoaded', startApp);
+    </script>
+</body>
+</html>
