@@ -10,181 +10,241 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f6f8fd 0%, #f1f4ff 100%);
+            color: #1e293b;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(31, 38, 135, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(31, 38, 135, 0.08);
+            border-color: #6366f1;
+        }
+
         .admin-sidebar {
+            background: rgba(255, 255, 255, 0.98);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -15px 0 35px rgba(0, 0, 0, 0.5);
+            box-shadow: -15px 0 45px rgba(0, 0, 0, 0.08);
             z-index: 999999;
         }
 
         .custom-input {
-            background: #1e293b !important;
-            border: 1px solid #334155 !important;
-            color: white !important;
-            padding: 10px !important;
-            border-radius: 8px !important;
+            background: #ffffff !important;
+            border: 2px solid #f1f5f9 !important;
+            color: #1e293b !important;
+            padding: 12px !important;
+            border-radius: 14px !important;
             width: 100% !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
+            transition: all 0.2s;
         }
 
         .custom-input:focus {
             border-color: #6366f1 !important;
+            background: #fff !important;
             outline: none;
         }
 
-        .chart-container { position: relative; width: 100%; max-width: 500px; margin: auto; height: 350px; }
+        .chart-container { position: relative; width: 100%; height: 350px; }
         
-        .tab-btn { padding: 8px; font-weight: 700; font-size: 11px; border-radius: 8px; transition: all 0.2s; text-transform: uppercase; }
-        .tab-btn.active { background: #6366f1; color: white; }
-        .tab-btn.inactive { background: #1e293b; color: #64748b; }
+        .tab-btn { padding: 10px; font-weight: 800; font-size: 11px; border-radius: 12px; transition: all 0.2s; text-transform: uppercase; }
+        .tab-btn.active { background: #6366f1; color: white; box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3); }
+        .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
+
+        .btn-action {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-action:hover { filter: brightness(1.1); transform: scale(1.02); }
+
+        .status-badge { padding: 5px 12px; border-radius: 30px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .badge-done { background: #dcfce7; color: #15803d; }
+        .badge-pending { background: #fef9c3; color: #a16207; }
+        .badge-other { background: #e0e7ff; color: #4338ca; }
+
+        /* Başarı Glow Efekti */
+        .glow-gold { text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); color: #eab308; }
+        .glow-bright-gold { text-shadow: 0 0 25px rgba(250, 204, 21, 0.7); color: #facc15; }
+        .text-critical { color: #0f172a; }
+
+        /* Geri Sayım Kutusu */
+        .countdown-item {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
     </style>
 </head>
-<body class="min-h-screen antialiased text-left pb-20">
+<body class="antialiased">
 
-    <!-- Admin Paneli (Sidebar) -->
-    <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 bg-slate-900 border-l border-slate-700 p-6 admin-sidebar translate-x-full overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-white">⚙️ Yönetim</h2>
-            <button onclick="window.toggleAdmin()" class="text-slate-400 hover:text-white text-2xl border-none bg-transparent cursor-pointer">&times;</button>
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-slate-100">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3 underline decoration-indigo-500 decoration-4 underline-offset-4">⚙️ Veri Merkezi</h2>
+            <button onclick="window.toggleAdmin()" class="text-slate-300 hover:text-slate-600 text-3xl transition-colors">&times;</button>
         </div>
 
-        <div class="flex gap-1 mb-6">
-            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1 text-center">İstatistikler</button>
-            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1 text-center">Kişiler</button>
-            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1 text-center">Görevler</button>
+        <div class="flex gap-2 mb-8 bg-slate-50 p-2 rounded-2xl">
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">İstatistikler</button>
+            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">Kişiler</button>
+            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1">Görevler</button>
         </div>
         
-        <!-- Sayılar Düzenleme -->
+        <!-- Sayılar -->
         <div id="sidebar-stats-content">
-            <div id="editor-list" class="space-y-4 mb-8"></div>
-            <div class="pt-6 border-t border-slate-700 space-y-3">
-                <button onclick="window.addNewCategory()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold text-white transition-all border-none cursor-pointer">+ Yeni Kategori</button>
-                <button onclick="window.seedDataToCloud()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400 cursor-pointer">İstatistikleri Sıfırla</button>
+            <div id="editor-list" class="space-y-5 mb-8"></div>
+            <div class="pt-8 border-t border-slate-100 space-y-3">
+                <button onclick="window.addNewCategory()" class="w-full py-4 btn-action rounded-2xl text-sm font-bold shadow-xl border-none">+ Yeni Kategori</button>
+                <button onclick="window.seedDataToCloud()" class="w-full py-2 text-slate-400 text-[10px] font-bold uppercase hover:text-slate-600 transition-colors">Verileri Baştan Yükle</button>
             </div>
         </div>
 
-        <!-- Kişi Ekleme/Düzenleme -->
-        <div id="sidebar-contacts-content" class="hidden space-y-4 text-left">
+        <!-- Kişiler -->
+        <div id="sidebar-contacts-content" class="hidden space-y-5">
             <div class="flex justify-between items-center">
-                <h3 class="text-indigo-400 text-xs font-black uppercase" id="contact-form-title">Yeni Kişi Kaydı</h3>
-                <button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold uppercase underline cursor-pointer">Vazgeç</button>
+                <h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="contact-form-title">Yeni Kayıt</h3>
+                <button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold uppercase">İptal</button>
             </div>
-            <div class="space-y-3">
+            <div class="space-y-4">
                 <input type="hidden" id="contact-edit-id">
                 <input type="text" id="contact-name" placeholder="Ad Soyad / Ünvan" class="custom-input">
                 <select id="contact-type" class="custom-input"></select>
                 <input type="email" id="contact-email" placeholder="E-posta" class="custom-input">
                 <input type="tel" id="contact-phone" placeholder="Telefon" class="custom-input">
-                <div class="pt-2 border-t border-slate-800">
-                    <label class="text-[10px] text-slate-500 font-bold mb-1 block">ARACI / REFERANS</label>
-                    <input type="text" id="contact-ref-name" placeholder="Aracının Adı" class="custom-input mb-2">
-                    <input type="tel" id="contact-ref-phone" placeholder="Aracının Telefonu" class="custom-input">
+                <div class="pt-4 border-t border-slate-100">
+                    <label class="text-[10px] font-bold text-slate-400 mb-2 block">ARACI / REFERANS</label>
+                    <input type="text" id="contact-ref-name" placeholder="Referans İsmi" class="custom-input mb-3">
+                    <input type="tel" id="contact-ref-phone" placeholder="Referans Telefonu" class="custom-input">
                 </div>
-                <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-20"></textarea>
-                <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all cursor-pointer">Kaydet</button>
+                <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-24"></textarea>
+                <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-4 btn-action rounded-2xl font-extrabold text-sm shadow-xl">KAYDET</button>
             </div>
         </div>
 
-        <!-- Görev Ekleme -->
-        <div id="sidebar-todos-content" class="hidden space-y-4 text-left">
-            <h3 class="text-indigo-400 text-xs font-black uppercase mb-4">Yeni Akademik Görev</h3>
-            <div class="space-y-3">
-                <input type="text" id="todo-task" placeholder="Görev Tanımı" class="custom-input">
+        <!-- Görevler -->
+        <div id="sidebar-todos-content" class="hidden space-y-5">
+            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Görev Planlayıcı</h3>
+            <div class="space-y-4">
+                <input type="text" id="todo-task" placeholder="Yeni Görev..." class="custom-input">
                 <select id="todo-status" class="custom-input">
                     <option value="Yapılmadı">Yapılmadı</option>
                     <option value="Yapıldı">Yapıldı</option>
                     <option value="Diğer">Diğer</option>
                 </select>
-                <textarea id="todo-desc" placeholder="Açıklama/Not..." class="custom-input h-24"></textarea>
-                <button onclick="window.addTodoToCloud()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm shadow-lg transition-all cursor-pointer">Ekle</button>
-                <button onclick="window.seedInitialTodos()" class="w-full py-2 border border-slate-700 hover:bg-slate-800 rounded-lg text-[10px] text-slate-400 mt-10 cursor-pointer">Tez Görevlerini Varsayılana Döndür</button>
+                <textarea id="todo-desc" placeholder="Açıklama..." class="custom-input h-24"></textarea>
+                <button onclick="window.addTodoToCloud()" class="w-full py-4 btn-action rounded-2xl font-black text-sm">GÖREV EKLE</button>
+                <button onclick="window.seedInitialTodos()" class="w-full py-3 bg-rose-50 text-rose-500 rounded-2xl text-[10px] font-bold uppercase mt-10 hover:bg-rose-100 transition-all">Tüm Görevleri Sıfırla</button>
             </div>
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 md:px-10 py-10">
-        <header class="text-center mb-12 relative">
-            <button onclick="window.toggleAdmin()" class="absolute top-0 right-0 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-6 py-2.5 rounded-full text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all shadow-lg cursor-pointer hidden md:block">🛠️ Verileri Yönet</button>
-            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase text-center w-full">Tez Stratejik Yönetim Portalı</h1>
-            <p id="sub-title" class="text-slate-400 text-lg m-0 italic text-center w-full">Bağlantı aktif.</p>
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <!-- Header & Countdown -->
+        <header class="flex flex-col md:flex-row justify-between items-start mb-16 gap-8 text-center md:text-left">
+            <div>
+                <h1 class="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter leading-none m-0 uppercase">
+                    TEZ <span class="text-indigo-600 italic">PORTALI</span>
+                </h1>
+                <p id="sub-title" class="text-slate-400 text-lg mt-3 font-semibold">Bulut tabanlı stratejik ilerleme analizi ✨</p>
+                <div class="mt-6 flex flex-wrap gap-2 justify-center md:justify-start">
+                    <button onclick="window.toggleAdmin()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:shadow-lg transition-all cursor-pointer">
+                        🛠️ Verileri Yönet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sağ Üst Geri Sayım Modülü -->
+            <div class="glass-card p-5 rounded-[2rem] flex flex-col gap-2 min-w-[280px]">
+                <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mb-1 text-center">Akademik Takvim & Geri Sayım</h3>
+                <div id="countdown-list" class="space-y-1.5">
+                    <!-- Geri sayımlar buraya dolacak -->
+                </div>
+            </div>
         </header>
 
-        <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 text-center"></div>
+        <!-- Dynamic Success Cards -->
+        <div id="stats-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-            <div class="lg:col-span-5 glass-card p-8 rounded-3xl flex flex-col items-center">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-6">Ağ Dengesi</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-24">
+            <div class="lg:col-span-5 glass-card p-10 rounded-[3rem] flex flex-col items-center">
+                <h3 class="text-slate-400 text-[10px] font-black uppercase tracking-[3px] mb-8">Ağ Dengesi Analizi</h3>
                 <div class="chart-container"><canvas id="radarChart"></canvas></div>
             </div>
             <div class="lg:col-span-7">
-                <div id="card-view" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="card-view" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
         </div>
 
-        <!-- Görüşme Rehberi -->
-        <section class="mt-16">
-            <div class="flex justify-between items-end mb-6">
-                <h2 class="text-2xl font-black text-white uppercase tracking-tight">📅 Görüşme ve İletişim Rehberi</h2>
-                <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-indigo-500 cursor-pointer">+ Kişi Ekle</button>
-            </div>
-            <div class="glass-card rounded-[2rem] overflow-hidden border border-slate-800">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[1000px]">
-                        <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-700">
-                            <tr>
-                                <th class="px-6 py-5">AD SOYAD</th>
-                                <th class="px-6 py-5">KATEGORİ</th>
-                                <th class="px-6 py-5">İLETİŞİM</th>
-                                <th class="px-6 py-5">ARACI / REF</th>
-                                <th class="px-6 py-5">NOTLAR</th>
-                                <th class="px-6 py-5 text-right">EYLEM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="contacts-table-body" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
+        <!-- Tables -->
+        <div class="space-y-24">
+            <section>
+                <div class="flex justify-between items-end mb-8 px-4">
+                    <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">📅 İletişim Rehberi</h2>
+                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('contacts')" class="text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Kişi</button>
                 </div>
-            </div>
-        </section>
+                <div class="glass-card rounded-[3rem] overflow-hidden border-none">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[1000px]">
+                            <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-8 py-6">AD SOYAD</th>
+                                    <th class="px-8 py-6">KATEGORİ</th>
+                                    <th class="px-8 py-6">İLETİŞİM</th>
+                                    <th class="px-8 py-6">ARACI</th>
+                                    <th class="px-8 py-6">NOTLAR</th>
+                                    <th class="px-8 py-6 text-right">EYLEM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contacts-table-body" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-        <!-- Yapılacaklar Listesi -->
-        <section class="mt-20">
-            <div class="flex justify-between items-end mb-6">
-                <h2 class="text-2xl font-black text-white uppercase tracking-tight">✅ Akademik Yapılacaklar Listesi</h2>
-                <button onclick="window.toggleAdmin(); window.switchSidebarTab('todos')" class="bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-600 hover:text-white cursor-pointer">+ Yeni Görev</button>
-            </div>
-            <div class="glass-card rounded-[2rem] overflow-hidden border border-slate-800">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[800px]">
-                        <thead class="bg-slate-800/40 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-700">
-                            <tr>
-                                <th class="px-6 py-5">GÖREV TANIMI</th>
-                                <th class="px-6 py-5 w-40">DURUM</th>
-                                <th class="px-6 py-5">AÇIKLAMA / DETAY</th>
-                                <th class="px-6 py-5 text-right">EYLEM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="todo-table-body" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
+            <section>
+                <div class="flex justify-between items-end mb-8 px-4">
+                    <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">✅ Akademik Görevler</h2>
+                    <button onclick="window.toggleAdmin(); window.switchSidebarTab('todos')" class="text-indigo-600 font-black text-xs uppercase hover:underline">+ Yeni Görev</button>
                 </div>
-            </div>
-        </section>
+                <div class="glass-card rounded-[3rem] overflow-hidden border-none">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
+                                <tr>
+                                    <th class="px-8 py-6">GÖREV TANIMI</th>
+                                    <th class="px-8 py-6 w-48">DURUM</th>
+                                    <th class="px-8 py-6">AÇIKLAMA / NOT</th>
+                                    <th class="px-8 py-6 text-right">EYLEM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="todo-table-body" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
@@ -222,6 +282,15 @@
             "İklim gazetecileriyle iletişime geçilecek", "BAP talepleri halledilecek"
         ];
 
+        // Geri Sayım Verileri
+        const deadlines = [
+            { label: 'Savunma Günü', date: '2026-06-15', emoji: '🎓' },
+            { label: 'Tez Bitişi', date: '2026-06-01', emoji: '📚' },
+            { label: 'Sonuçların Yazımı', date: '2026-05-15', emoji: '✍️' },
+            { label: 'Analizin Yazımı', date: '2026-04-27', emoji: '📊' },
+            { label: 'Veri Analizi', date: '2026-04-05', emoji: '🔍' }
+        ];
+
         let db, auth, radarChart;
         let stats = [], contacts = [], todos = [];
 
@@ -230,66 +299,113 @@
             db = getFirestore(app);
             auth = getAuth(app);
             await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => {
-                if (user) setupDataListeners();
-            });
+            onAuthStateChanged(auth, (user) => { if (user) setupListeners(); });
+            renderCountdowns();
         };
 
-        const setupDataListeners = () => {
+        const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), (snap) => {
                 stats = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => a.order - b.order);
-                renderDashboard(); renderStatsEditor(); updateRadar(); updateContactDropdown();
+                renderDash(); renderStatsEditor(); updateRadar(); updateContactDropdown();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), (snap) => {
                 contacts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderContactsTable();
+                renderContacts();
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), (snap) => {
                 if (snap.empty) { window.seedInitialTodos(); return; }
-                todos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => a.createdAt - b.createdAt);
-                renderTodoTable();
+                todos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+                renderTodos();
             });
         };
 
-        // --- RENDER FUNCTIONS ---
-        function renderDashboard() {
+        // --- COUNTDOWN LOGIC ---
+        function renderCountdowns() {
+            const list = document.getElementById('countdown-list');
+            list.innerHTML = '';
+            const now = new Date();
+
+            deadlines.forEach(item => {
+                const target = new Date(item.date);
+                const diffTime = target - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let colorClass = 'text-slate-600';
+                if (diffDays <= 30) colorClass = 'text-rose-500 font-black';
+                else if (diffDays <= 90) colorClass = 'text-indigo-600 font-bold';
+
+                const div = document.createElement('div');
+                div.className = 'countdown-item';
+                div.innerHTML = `
+                    <span class="text-xs">${item.emoji}</span>
+                    <span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${item.label}</span>
+                    <span class="text-xs ${colorClass}">${diffDays > 0 ? diffDays + ' gün' : 'Süre Doldu'}</span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- COLORS LOGIC ---
+        function getSuccessTheme(perc) {
+            if (perc >= 90) return { class: 'glow-bright-gold text-yellow-400', label: 'Efsane!' };
+            if (perc >= 70) return { class: 'glow-gold text-yellow-600', label: 'Harika!' };
+            if (perc < 40) return { class: 'text-slate-900 opacity-90', label: 'Hızlanmalısın' };
+            return { class: 'text-indigo-600', label: 'İyi Gidiyor' };
+        }
+
+        function getGroupColor(perc, completed) {
+            if (perc === 100) return 'text-emerald-500';
+            if (completed === 0) return 'text-rose-500';
+            return 'text-indigo-600';
+        }
+
+        // --- RENDERS ---
+        function renderDash() {
             const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
+            if(!container || !summary) return;
             container.innerHTML = '';
             let tDone = 0, tTarget = 0;
+
             stats.forEach(item => {
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
+                const groupColor = getGroupColor(perc, item.completed);
+                
                 const card = document.createElement('div');
-                card.className = 'glass-card rounded-3xl p-6 text-left shadow-lg';
+                card.className = 'glass-card rounded-[2.5rem] p-8';
                 let icons = '';
-                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-10 grayscale'}">${item.emoji}</span>`;
-                card.innerHTML = `<div class="flex justify-between items-start mb-4"><div><h3 class="font-bold text-sm">${item.title}</h3><p class="text-[10px] opacity-40 uppercase font-bold">${item.completed}/${item.total}</p></div><span class="text-2xl font-black text-indigo-400">${perc}%</span></div><div class="flex flex-wrap gap-1 mb-6">${icons}</div><div class="h-1 bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 transition-all duration-1000" style="width:${perc}%"></div></div>`;
+                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji}</span>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h3 class="font-black text-slate-800 text-lg">${item.title}</h3><p class="text-[10px] text-slate-400 font-black uppercase tracking-wider">${item.completed}/${item.total} KİŞİ</p></div><span class="text-3xl font-black ${groupColor}">${perc}%</span></div><div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${perc === 100 ? 'bg-emerald-500' : (item.completed === 0 ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600')} transition-all duration-1000" style="width:${perc}%"></div></div>`;
                 container.appendChild(card);
             });
+
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
-            summary.innerHTML = `<div class="glass-card p-5 rounded-3xl border-l-4 border-indigo-500"><p class="text-[10px] font-bold opacity-40">Genel Başarı</p><p class="text-3xl font-black">%${overall}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Biten</p><p class="text-3xl font-black">${tDone}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Kalan</p><p class="text-3xl font-black text-indigo-400">${tTarget-tDone}</p></div><div class="glass-card p-5 rounded-3xl"><p class="text-[10px] font-bold opacity-40">Kategori</p><p class="text-3xl font-black">${stats.length}</p></div>`;
+            const theme = getSuccessTheme(overall);
+            summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Genel Başarı</p><p class="text-5xl font-black ${theme.class} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${theme.label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Grup</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
         }
 
-        function renderContactsTable() {
+        function renderContacts() {
             const body = document.getElementById('contacts-table-body');
-            body.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-10 text-center opacity-30 italic">Rehber boş.</td></tr>' : '';
+            if(!body) return;
+            body.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-16 text-center text-slate-300 italic">Henüz kimse eklenmedi.</td></tr>' : '';
             contacts.forEach(c => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-white/5 transition-colors text-sm';
-                tr.innerHTML = `<td class="px-6 py-5 font-bold">${c.name}</td><td class="px-6 py-5"><span class="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-[10px] font-black uppercase">${c.type}</span></td><td class="px-6 py-5 text-slate-400">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td><td class="px-6 py-5 text-slate-400">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td><td class="px-6 py-5 max-w-[200px] text-xs text-slate-500 italic">${c.note || '-'}</td><td class="px-6 py-5 text-right space-x-2"><button onclick="window.editContact('${c.id}')" class="text-indigo-400 hover:text-indigo-300 font-bold text-[10px] cursor-pointer">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-900 hover:text-rose-500 font-bold text-[10px] cursor-pointer">SİL</button></td>`;
+                tr.className = 'hover:bg-indigo-50/50 transition-colors text-sm';
+                tr.innerHTML = `<td class="px-8 py-6 font-bold text-slate-800">${c.name}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">${c.type}</span></td><td class="px-8 py-6 text-slate-500 font-medium">📧 ${c.email || '-'}<br>📞 ${c.phone || '-'}</td><td class="px-8 py-6 text-slate-500">👤 ${c.refName || '-'}<br><span class="text-xs">📱 ${c.refPhone || '-'}</span></td><td class="px-8 py-6 max-w-[200px] text-xs text-slate-400 italic">${c.note || '-'}</td><td class="px-8 py-6 text-right space-x-3"><button onclick="window.editContact('${c.id}')" class="text-indigo-600 hover:text-indigo-800 font-black text-[10px] uppercase cursor-pointer">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 hover:text-rose-600 font-black text-[10px] uppercase cursor-pointer">SİL</button></td>`;
                 body.appendChild(tr);
             });
         }
 
-        function renderTodoTable() {
+        function renderTodos() {
             const body = document.getElementById('todo-table-body');
+            if(!body) return;
             body.innerHTML = '';
             todos.forEach(t => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-white/5 transition-colors text-sm';
-                const statusColor = t.status === 'Yapıldı' ? 'text-emerald-400' : (t.status === 'Diğer' ? 'text-indigo-400' : 'text-slate-500');
-                tr.innerHTML = `<td class="px-6 py-5 text-white font-semibold">${t.task}</td><td class="px-6 py-5"><select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-slate-900 border border-slate-700 text-xs p-1 rounded ${statusColor}"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select></td><td class="px-6 py-5"><input type="text" value="${t.desc || ''}" placeholder="Detay yazın..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b border-slate-800 focus:border-indigo-500 outline-none w-full text-xs text-slate-400 italic"></td><td class="px-6 py-5 text-right"><button onclick="window.deleteTodo('${t.id}')" class="text-rose-900 hover:text-rose-500 font-bold text-[10px] cursor-pointer">SİL</button></td>`;
+                tr.className = 'hover:bg-slate-50 transition-colors text-sm';
+                const statusClass = t.status === 'Yapıldı' ? 'badge-done' : (t.status === 'Diğer' ? 'badge-other' : 'badge-pending');
+                tr.innerHTML = `<td class="px-8 py-6 text-slate-800 font-bold">${t.task}</td><td class="px-8 py-6"><select onchange="window.updateTodoStatus('${t.id}', this.value)" class="bg-white border border-slate-100 p-2 rounded-xl status-badge ${statusClass} font-black cursor-pointer outline-none"><option value="Yapılmadı" ${t.status === 'Yapılmadı' ? 'selected' : ''}>Yapılmadı</option><option value="Yapıldı" ${t.status === 'Yapıldı' ? 'selected' : ''}>Yapıldı</option><option value="Diğer" ${t.status === 'Diğer' ? 'selected' : ''}>Diğer</option></select></td><td class="px-8 py-6"><input type="text" value="${t.desc || ''}" placeholder="Detay ekle..." onchange="window.updateTodoDesc('${t.id}', this.value)" class="bg-transparent border-b-2 border-slate-100 focus:border-indigo-400 outline-none w-full text-xs text-slate-400 italic py-1"></td><td class="px-8 py-6 text-right"><button onclick="window.deleteTodo('${t.id}')" class="text-rose-300 hover:text-rose-500 font-black text-[10px] uppercase cursor-pointer">SİL</button></td>`;
                 body.appendChild(tr);
             });
         }
@@ -299,7 +415,7 @@
             const id = document.getElementById('contact-edit-id').value;
             const name = document.getElementById('contact-name').value;
             const type = document.getElementById('contact-type').value;
-            if(!name || !type) return alert("İsim ve Kategori zorunludur!");
+            if(!name || !type) return alert("İsim ve Kategori girilmeli!");
             const cData = { name, type, email: document.getElementById('contact-email').value, phone: document.getElementById('contact-phone').value, refName: document.getElementById('contact-ref-name').value, refPhone: document.getElementById('contact-ref-phone').value, note: document.getElementById('contact-note').value, updatedAt: Date.now() };
             if(id) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id), cData);
             else { cData.createdAt = Date.now(); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', `c-${Date.now()}`), cData); }
@@ -317,23 +433,23 @@
             document.getElementById('contact-ref-name').value = c.refName || '';
             document.getElementById('contact-ref-phone').value = c.refPhone || '';
             document.getElementById('contact-note').value = c.note || '';
-            document.getElementById('contact-form-title').innerText = "Kişiyi Düzenle";
+            document.getElementById('contact-form-title').innerText = "Kayıt Güncelleme";
             document.getElementById('btn-cancel-edit').classList.remove('hidden');
-            document.getElementById('btn-save-contact').innerText = "Güncelle";
+            document.getElementById('btn-save-contact').innerText = "GÜNCELLE";
             window.switchSidebarTab('contacts');
             if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
         };
 
         window.resetContactForm = () => {
             ['contact-edit-id','contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(i => document.getElementById(i).value = '');
-            document.getElementById('contact-form-title').innerText = "Yeni Kişi Kaydı";
+            document.getElementById('contact-form-title').innerText = "Yeni Kayıt";
             document.getElementById('btn-cancel-edit').classList.add('hidden');
-            document.getElementById('btn-save-contact').innerText = "Kaydet";
+            document.getElementById('btn-save-contact').innerText = "KAYDET";
         };
 
         window.addTodoToCloud = async () => {
             const task = document.getElementById('todo-task').value;
-            if(!task) return alert("Görev tanımı girin!");
+            if(!task) return alert("Görev girilmeli!");
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `t-${Date.now()}`), { task, status: document.getElementById('todo-status').value, desc: document.getElementById('todo-desc').value, createdAt: Date.now() });
             document.getElementById('todo-task').value = ''; document.getElementById('todo-desc').value = '';
         };
@@ -344,7 +460,7 @@
         window.deleteContact = async (id) => confirm('Kişi silinsin mi?') && await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'randevular', id));
 
         window.seedInitialTodos = async () => {
-            if(!confirm('Mevcut liste silinip 12 maddelik başlangıç listesi yüklenecek. Emin misiniz?')) return;
+            if(!confirm('Tüm akademik görevler sıfırlanacak?')) return;
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'));
             for(const d of snap.docs) await deleteDoc(d.ref);
             for(let i=0; i<initialTodos.length; i++) {
@@ -353,7 +469,7 @@
         };
 
         window.seedDataToCloud = async () => {
-            if(!confirm('Sayısal veriler sıfırlanacak. Emin misiniz?')) return;
+            if(!confirm('İstatistikler sıfırlanacak?')) return;
             const snap = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'));
             for(const d of snap.docs) await deleteDoc(d.ref);
             for (const item of initialStats) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'gorusmeler', item.title.toLowerCase().replace(/\s/g,'-')), item);
@@ -374,27 +490,33 @@
         
         function updateContactDropdown() {
             const select = document.getElementById('contact-type');
+            if(!select) return;
             const cur = select.value;
-            select.innerHTML = '<option value="">Kategori...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
+            select.innerHTML = '<option value="">Kategori Seç...</option>' + stats.map(s => `<option value="${s.title}">${s.title}</option>`).join('');
             select.value = cur;
         }
 
         function renderStatsEditor() {
             const list = document.getElementById('editor-list');
-            list.innerHTML = stats.map(i => `<div class="p-4 bg-slate-800/40 rounded-xl border border-slate-700 relative">
-                <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-500 text-xs border-none bg-transparent cursor-pointer">Sil</button>
-                <div><label class="text-[10px] opacity-50 block mb-1">BAŞLIK</label><input type="text" value="${i.title}" class="custom-input" onchange="window.updateValue('${i.id}', 'title', this.value)"></div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <div><label class="text-[10px] opacity-50">BİTEN</label><input type="number" value="${i.completed}" class="custom-input" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div>
-                    <div><label class="text-[10px] opacity-50">HEDEF</label><input type="number" value="${i.total}" class="custom-input" onchange="window.updateValue('${i.id}', 'total', this.value)"></div>
+            if(!list) return;
+            list.innerHTML = stats.map(i => `<div class="p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] relative shadow-sm">
+                <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold border-none bg-transparent cursor-pointer">Sil</button>
+                <div class="space-y-3">
+                    <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kategori</label><input type="text" value="${i.title}" class="custom-input" onchange="window.updateValue('${i.id}', 'title', this.value)"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Biten</label><input type="number" value="${i.completed}" class="custom-input" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div>
+                        <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Hedef</label><input type="number" value="${i.total}" class="custom-input" onchange="window.updateValue('${i.id}', 'total', this.value)"></div>
+                    </div>
                 </div>
             </div>`).join('');
         }
 
         function updateRadar() {
-            const ctx = document.getElementById('radarChart').getContext('2d');
+            const canvas = document.getElementById('radarChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
             if(radarChart) radarChart.destroy();
-            radarChart = new Chart(ctx, { type: 'radar', data: { labels: stats.map(d => d.title), datasets: [{ label: '% Başarı', data: stats.map(d => (d.completed/d.total)*100), backgroundColor: 'rgba(99, 102, 241, 0.2)', borderColor: '#6366f1', borderWidth: 2, pointBackgroundColor: '#fff' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#94a3b8', font: { size: 9, weight: '600' } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } } });
+            radarChart = new Chart(ctx, { type: 'radar', data: { labels: stats.map(d => d.title), datasets: [{ label: '% Başarı', data: stats.map(d => (d.completed/d.total)*100), backgroundColor: 'rgba(99, 102, 241, 0.15)', borderColor: '#6366f1', borderWidth: 3, pointBackgroundColor: '#fff', pointRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#f1f5f9' }, grid: { color: '#f1f5f9' }, pointLabels: { color: '#64748b', font: { size: 10, weight: '700', family: 'Plus Jakarta Sans' } }, ticks: { display: false }, suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } } });
         }
 
         startApp();
