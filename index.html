@@ -14,7 +14,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #f6f8fd 0%, #f1f4ff 100%);
             color: #1e293b;
-            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh;
+            min-height: 100vh;
         }
 
         .glass-card {
@@ -26,7 +26,6 @@
         }
         .glass-card:hover { transform: translateY(-4px); border-color: #6366f1; }
 
-        /* %100 Altın Kart Stili */
         .gold-card {
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
             border: 2px solid #fcd34d;
@@ -36,7 +35,6 @@
         }
         .gold-card:hover { transform: scale(1.05); box-shadow: 0 25px 60px rgba(251, 191, 36, 0.3); }
 
-        /* %0 Karanlık Kart Stili */
         .dark-card {
             background: #f1f5f9;
             border: 1px solid #e2e8f0;
@@ -63,11 +61,16 @@
         .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; text-transform: uppercase; cursor: pointer; }
         .tab-btn.active { background: #6366f1; color: white; }
         .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
-        
         .hidden-mode { display: none !important; }
         .important-note { color: #ef4444 !important; font-weight: 800 !important; font-style: normal !important; }
         
-        /* ALEV EFEKTLERİ */
+        /* Renkli Durum Badge'leri */
+        .status-badge { padding: 6px 14px; border-radius: 30px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-done { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-pending { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+        .badge-other { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+
+        /* Alev Efektleri */
         @keyframes burn-gold {
             0% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; }
             100% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; }
@@ -91,7 +94,6 @@
         .quote-active { transform: translateX(0); opacity: 1; }
         .quote-exit { transform: translateX(-100%); opacity: 0; }
         
-        /* Timeline */
         .log-timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; }
         .log-timeline-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; border: 2px solid white; }
     </style>
@@ -130,10 +132,13 @@
         </div>
 
         <div id="sidebar-todos-content" class="hidden space-y-5">
-            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Görev Planlayıcı</h3>
+            <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="todo-form-title">Yeni Görev</h3><button onclick="window.resetTodoForm()" id="btn-cancel-todo" class="hidden text-rose-500 text-[10px] font-bold uppercase cursor-pointer">İptal</button></div>
             <div class="space-y-4">
-                <input type="text" id="todo-task" placeholder="Yeni Görev..." class="custom-input"><select id="todo-status" class="custom-input"><option value="Yapılmadı">Yapılmadı</option><option value="Yapıldı">Yapıldı</option><option value="Diğer">Diğer</option></select><textarea id="todo-desc" placeholder="Açıklama..." class="custom-input h-24"></textarea>
-                <button onclick="window.addTodoToCloud()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">EKLE</button>
+                <input type="hidden" id="todo-edit-id">
+                <input type="text" id="todo-task" placeholder="Görev Başlığı..." class="custom-input">
+                <select id="todo-status" class="custom-input"><option value="Yapılmadı">Yapılmadı</option><option value="Yapıldı">Yapıldı</option><option value="Diğer">Diğer</option></select>
+                <textarea id="todo-desc" placeholder="Açıklama / Not..." class="custom-input h-24"></textarea>
+                <button onclick="window.addTodoToCloud()" id="btn-save-todo" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">GÖREVİ KAYDET</button>
             </div>
         </div>
 
@@ -267,12 +272,12 @@
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), s => { stats = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0)); renderDash(); renderStatsEditor(); updateRadar(); updateContactDropdown(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), s => { contacts = s.docs.map(d => ({id:d.id,...d.data()})); renderContacts(); });
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), s => { todos = s.docs.map(d => ({id:d.id,...d.data()})); renderTodos(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), s => { todos = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt); renderTodos(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sozler'), s => { quotes = s.docs.map(d => ({id:d.id,...d.data()})); renderQuotesAdmin(); startQuoteRotation(); });
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'tez_gunlugu'), orderBy('createdAt', 'desc')), s => { renderDailyLogs(s.docs.map(d => ({id:d.id,...d.data()}))); });
         };
 
-        // --- DASHBOARD (RENK & EFEKT ŞOVU) ---
+        // --- DASHBOARD ---
         function renderDash() {
             const container = document.getElementById('card-view');
             const summary = document.getElementById('stats-summary');
@@ -283,112 +288,113 @@
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
                 
-                // KART TASARIM MANTIĞI
-                let cardClass = 'glass-card'; // Varsayılan
-                let titleColor = 'text-slate-800';
-                
-                if(perc === 100) {
-                    // %100: Altın, Parlak, Şov
-                    cardClass = 'gold-card';
-                    titleColor = 'text-amber-800';
-                } else if(item.completed === 0) {
-                    // %0: Karanlık, Sönük
-                    cardClass = 'dark-card';
-                    titleColor = 'text-slate-500';
-                }
+                let cardClass = 'glass-card', titleColor = 'text-slate-800', barColor = perc === 100 ? 'bg-amber-400' : 'bg-indigo-600';
+                if(perc === 100) { cardClass = 'gold-card'; titleColor = 'text-amber-800'; }
+                else if(item.completed === 0) { cardClass = 'dark-card'; titleColor = 'text-slate-500'; barColor = 'bg-slate-300'; }
 
                 const card = document.createElement('div');
                 card.className = `${cardClass} rounded-[2.5rem] p-8 text-left`;
-                let icons = ''; 
-                for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji || '📌'}</span>`;
-                
-                // Progress Bar Rengi: %100 ise Altın/Zümrüt karışımı
-                let barColor = perc === 100 ? 'bg-amber-400' : 'bg-indigo-600';
-                if(item.completed === 0) barColor = 'bg-slate-300';
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-6">
-                        <div>
-                            <h3 class="font-black ${titleColor} text-lg">${item.title}</h3>
-                            <p class="text-[10px] ${perc===100?'text-amber-600':'text-slate-400'} font-black uppercase tracking-wider">${item.completed}/${item.total}</p>
-                        </div>
-                        <span class="text-3xl font-black ${perc===100?'text-amber-500':(item.completed===0?'text-slate-400':'text-indigo-600')}">${perc}%</span>
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full ${barColor} transition-all duration-1000" style="width:${perc}%"></div>
-                    </div>
-                `;
+                let icons = ''; for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji || '📌'}</span>`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-6"><div><h3 class="font-black ${titleColor} text-lg">${item.title}</h3><p class="text-[10px] ${perc===100?'text-amber-600':'text-slate-400'} font-black uppercase tracking-wider">${item.completed}/${item.total}</p></div><span class="text-3xl font-black ${perc===100?'text-amber-500':(item.completed===0?'text-slate-400':'text-indigo-600')}">${perc}%</span></div><div class="flex flex-wrap gap-2 mb-6 min-h-[30px]">${icons}</div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${barColor} transition-all duration-1000" style="width:${perc}%"></div></div>`;
                 container.appendChild(card);
             });
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
-            
-            // ALEV MANTIĞI
-            let percentageClass = 'text-indigo-600';
-            let label = 'İLERLİYOR';
-            if (overall >= 90) { percentageClass = 'flame-max'; label = 'EFSANE!'; }
-            else if (overall >= 70) { percentageClass = 'flame-gold'; label = 'HARİKA!'; }
+            let percentageClass = 'text-indigo-600', label = 'İLERLİYOR';
+            if (overall >= 90) { percentageClass = 'flame-max'; label = 'EFSANE!'; } else if (overall >= 70) { percentageClass = 'flame-gold'; label = 'HARİKA!'; }
             
             summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Başarı</p><p class="text-5xl font-black ${percentageClass} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kategori</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
         }
 
-        // --- VERİ MERKEZİ EDİTÖRÜ ---
-        function renderStatsEditor() {
-            const list = document.getElementById('editor-list');
-            if(!list) return;
-            list.innerHTML = stats.map(i => `
-                <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl relative shadow-sm">
-                    <button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[10px] border-none bg-transparent cursor-pointer">Sil</button>
-                    <div class="space-y-3 pt-2">
-                        <input type="text" value="${i.title}" class="custom-input h-10 text-xs font-bold" onchange="window.updateValue('${i.id}', 'title', this.value)">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-[8px] font-black text-slate-400 uppercase">Biten</label><input type="number" value="${i.completed}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div>
-                            <div><label class="text-[8px] font-black text-slate-400 uppercase">Hedef</label><input type="number" value="${i.total}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'total', this.value)"></div>
-                        </div>
-                    </div>
-                </div>`).join('');
-        }
+        // --- GÖREVLER (RENKLİ + DÜZENLEME) ---
+        function renderTodos() {
+            const b = document.getElementById('todo-table-body');
+            if(!b) return;
+            b.innerHTML = '';
+            todos.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm';
+                
+                // Durum Badge Rengi
+                let badgeClass = 'badge-pending';
+                if(t.status === 'Yapıldı') badgeClass = 'badge-done';
+                else if(t.status === 'Diğer') badgeClass = 'badge-other';
 
-        // --- RADAR GRAFİĞİ ---
-        function updateRadar() {
-            const canvas = document.getElementById('radarChart');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            if(radarChart) radarChart.destroy();
-            radarChart = new Chart(ctx, { 
-                type: 'radar', 
-                data: { 
-                    labels: stats.map(d => d.title), 
-                    datasets: [{ 
-                        label: '% Başarı',
-                        data: stats.map(d => d.total > 0 ? (d.completed/d.total)*100 : 0), 
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)', 
-                        borderColor: '#6366f1', 
-                        borderWidth: 2 
-                    }] 
-                }, 
-                options: { 
-                    plugins: { legend: { display: false } }, 
-                    scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { display: false } } } 
-                } 
+                const statusHtml = `<span class="status-badge ${badgeClass}">${t.status}</span>`;
+                const descDisp = isAdmin ? (t.desc || '-') : '**********';
+                
+                // Admin İşlemleri
+                const actions = isAdmin ? 
+                    `<button onclick="window.editTodo('${t.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button>
+                     <button onclick="window.deleteTodo('${t.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-';
+
+                tr.innerHTML = `
+                    <td class="px-8 py-6 font-bold text-slate-800">${t.task}</td>
+                    <td class="px-8 py-6">${statusHtml}</td>
+                    <td class="px-8 py-6 italic text-slate-500">${descDisp}</td>
+                    <td class="px-8 py-6 text-right">${actions}</td>
+                `;
+                b.appendChild(tr);
             });
         }
 
-        // --- DİĞER İŞLEVLER ---
-        window.saveDailyLog = async () => { const t = document.getElementById('new-log-text').value; if(!t||!isAdmin)return; const d = new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}); await setDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',`log-${Date.now()}`),{text:t,dateDisplay:d,createdAt:Date.now()}); document.getElementById('new-log-text').value=''; };
-        function renderDailyLogs(logs) { const c = document.getElementById('daily-logs-display'); if(!c)return; c.innerHTML = logs.length===0?'<p class="text-center text-slate-300 italic font-bold">Henüz not yok...</p>':''; logs.forEach(l => { const d = document.createElement('div'); d.className='glass-card p-6 rounded-[2rem] log-timeline-item shadow-sm'; d.innerHTML=`<div class="flex justify-between items-start mb-2"><span class="text-[10px] font-black text-indigo-500 uppercase">${l.dateDisplay}</span>${isAdmin?`<button onclick="window.deleteLog('${l.id}')" class="text-rose-400 font-bold text-[9px]">SİL</button>`:''}</div><p class="text-slate-700 font-semibold text-sm">${l.text}</p>`; c.appendChild(d); }); }
-        window.deleteLog = async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',id));
-        
+        // --- TODO DÜZENLEME FONKSİYONLARI ---
+        window.editTodo = (id) => {
+            const t = todos.find(item => item.id === id);
+            if(!t) return;
+            document.getElementById('todo-edit-id').value = t.id;
+            document.getElementById('todo-task').value = t.task;
+            document.getElementById('todo-status').value = t.status;
+            document.getElementById('todo-desc').value = t.desc || '';
+            document.getElementById('todo-form-title').innerText = "Görevi Düzenle";
+            document.getElementById('btn-save-todo').innerText = "GÜNCELLE";
+            document.getElementById('btn-cancel-todo').classList.remove('hidden');
+            window.switchSidebarTab('todos');
+            if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
+        };
+
+        window.resetTodoForm = () => {
+            document.getElementById('todo-edit-id').value = '';
+            document.getElementById('todo-task').value = '';
+            document.getElementById('todo-status').value = 'Yapılmadı';
+            document.getElementById('todo-desc').value = '';
+            document.getElementById('todo-form-title').innerText = "Yeni Görev";
+            document.getElementById('btn-save-todo').innerText = "GÖREVİ KAYDET";
+            document.getElementById('btn-cancel-todo').classList.add('hidden');
+        };
+
+        window.addTodoToCloud = async () => {
+            const id = document.getElementById('todo-edit-id').value;
+            const task = document.getElementById('todo-task').value;
+            if(!task || !isAdmin) return;
+            const data = {
+                task, 
+                status: document.getElementById('todo-status').value, 
+                desc: document.getElementById('todo-desc').value, 
+                createdAt: Date.now()
+            };
+
+            if(id) {
+                // Güncelleme
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), data);
+            } else {
+                // Yeni Kayıt
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `t-${Date.now()}`), data);
+            }
+            window.resetTodoForm();
+        };
+
+        // --- REHBER ---
         function renderContacts() { 
-            const b=document.getElementById('contacts-table-body'); if(!b)return; b.innerHTML=contacts.length===0?'<tr><td colspan="6" class="text-center p-8 text-slate-300 italic">Boş</td></tr>':''; 
+            const b=document.getElementById('contacts-table-body'); if(!b)return; 
+            b.innerHTML=contacts.length===0?'<tr><td colspan="6" class="text-center p-8 text-slate-300 italic">Liste boş...</td></tr>':''; 
             contacts.forEach(c=>{ 
                 const tr=document.createElement('tr'); tr.className='hover:bg-indigo-50/50 text-sm'; 
                 const n=isAdmin?c.name:maskString(c.name); const r=isAdmin?(c.refName||'-'):maskString(c.refName); const nt=isAdmin?(c.note||'-'):'****'; 
                 tr.innerHTML=`<td class="px-8 py-6 font-bold text-slate-800">${n}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black">${c.type}</span></td><td class="px-8 py-6 text-slate-500">${isAdmin?`📧 ${c.email||'-'}`:'***'}</td><td class="px-8 py-6 text-slate-500">${r}</td><td class="px-8 py-6 important-note italic">${nt}</td><td class="px-8 py-6 text-right">${isAdmin?`<button onclick="window.editContact('${c.id}')" class="text-indigo-600 font-bold mr-2">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 font-bold">SİL</button>`:'-'}</td>`; b.appendChild(tr); 
             }); 
         }
-        
-        // --- AUTH YÖNETİMİ ---
+
+        // --- AUTH & DİĞER ---
         window.handleAuth = async () => {
             if (!isAdmin) {
                 if (prompt("Yönetici Şifresi:") === "531") { isAdmin = true; await saveAdminStatus(true); updateUIForMode(); }
@@ -416,34 +422,35 @@
                 masterBtn.classList.remove('hidden-mode');
                 if(journalSection) journalSection.classList.remove('hidden-mode');
                 hiddenElements.forEach(el => el.classList.remove('hidden-mode'));
-                // Yönetici girince günlükleri çek
                 if(db) onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'tez_gunlugu'), orderBy('createdAt', 'desc')), s => { renderDailyLogs(s.docs.map(d => ({id:d.id,...d.data()}))); });
             } else {
                 status.className = "mode-indicator mode-guest shadow-sm"; document.getElementById('mode-icon').innerText = "👤"; document.getElementById('mode-text').innerText = "Misafir Modu"; document.getElementById('btn-login-toggle').innerText = "Yönetici Girişi";
                 dailyArea.classList.add('hidden-mode');
                 masterBtn.classList.add('hidden-mode');
                 if(journalSection) journalSection.classList.add('hidden-mode');
-                // Misafir modunda günlükleri temizle
                 renderDailyLogs([]);
             }
             renderContacts(); renderTodos();
         }
 
-        // --- CRUD & HELPERS ---
-        window.updateValue = async (id,f,v) => isAdmin && await updateDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id),{[f]:(f==='completed'||f==='total')?parseInt(v)||0:v});
-        window.addNewCategory = async()=>isAdmin&&await setDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',`cat-${Date.now()}`),{title:'Yeni',completed:0,total:5,emoji:'📌',order:stats.length+1});
-        window.removeCategory = async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id));
-        function renderTodos(){ const b=document.getElementById('todo-table-body'); if(!b)return; b.innerHTML=''; todos.forEach(t=>{ const tr=document.createElement('tr'); const st=isAdmin?`<select onchange="window.updateTodoStatus('${t.id}',this.value)" class="bg-white p-2 rounded-xl text-[10px] font-black"><option value="Yapılmadı" ${t.status=='Yapılmadı'?'selected':''}>YAPILMADI</option><option value="Yapıldı" ${t.status=='Yapıldı'?'selected':''}>YAPILDI</option></select>`:t.status; tr.innerHTML=`<td class="px-8 py-6 font-bold">${t.task}</td><td class="px-8 py-6">${st}</td><td class="px-8 py-6 important-note italic">${isAdmin?(t.desc||'-'):'***'}</td><td class="px-8 py-6 text-right">${isAdmin?`<button onclick="window.deleteTodo('${t.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>`:'-'}</td>`; b.appendChild(tr);}); }
-        window.updateTodoStatus=async(id,s)=>isAdmin&&await updateDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id),{status:s}); window.deleteTodo=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id));
-        window.addTodoToCloud=async()=>{const t=document.getElementById('todo-task').value; if(!t||!isAdmin)return; await setDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',`t-${Date.now()}`),{task:t,status:document.getElementById('todo-status').value,desc:document.getElementById('todo-desc').value,createdAt:Date.now()}); document.getElementById('todo-task').value='';};
-        window.addContactToCloud=async()=>{const n=document.getElementById('contact-name').value; if(!n||!isAdmin)return; const d={name:n,type:document.getElementById('contact-type').value,email:document.getElementById('contact-email').value,phone:document.getElementById('contact-phone').value,refName:document.getElementById('contact-ref-name').value,refPhone:document.getElementById('contact-ref-phone').value,note:document.getElementById('contact-note').value,updatedAt:Date.now()}; const id=document.getElementById('contact-edit-id').value; if(id)await updateDoc(doc(db,'artifacts',appId,'public','data','randevular',id),d); else {d.createdAt=Date.now();await setDoc(doc(db,'artifacts',appId,'public','data','randevular',`c-${Date.now()}`),d);} window.resetContactForm();};
-        window.editContact=(id)=>{const c=contacts.find(i=>i.id===id); if(!c)return; document.getElementById('contact-edit-id').value=c.id; document.getElementById('contact-name').value=c.name; document.getElementById('contact-type').value=c.type; document.getElementById('contact-email').value=c.email; document.getElementById('contact-phone').value=c.phone; document.getElementById('contact-ref-name').value=c.refName; document.getElementById('contact-ref-phone').value=c.refPhone; document.getElementById('contact-note').value=c.note; document.getElementById('contact-form-title').innerText="Düzenle"; document.getElementById('btn-cancel-edit').classList.remove('hidden'); window.switchSidebarTab('contacts'); if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();};
-        window.resetContactForm=()=>{['contact-edit-id','contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(i=>document.getElementById(i).value=''); document.getElementById('contact-form-title').innerText="Yeni Kayıt"; document.getElementById('btn-cancel-edit').classList.add('hidden');};
+        // --- STANDART HELPER & CRUD ---
+        function renderStatsEditor() { const l=document.getElementById('editor-list'); if(!l)return; l.innerHTML=stats.map(i=>`<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl relative shadow-sm"><button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[10px] border-none bg-transparent cursor-pointer">Sil</button><div class="space-y-3 pt-2"><input type="text" value="${i.title}" class="custom-input h-10 text-xs font-bold" onchange="window.updateValue('${i.id}', 'title', this.value)"><div class="grid grid-cols-2 gap-2"><div><label class="text-[8px] font-black text-slate-400 uppercase">Biten</label><input type="number" value="${i.completed}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div><div><label class="text-[8px] font-black text-slate-400 uppercase">Hedef</label><input type="number" value="${i.total}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'total', this.value)"></div></div></div></div>`).join(''); }
+        function updateRadar() { const c=document.getElementById('radarChart')?.getContext('2d'); if(!c)return; if(radarChart)radarChart.destroy(); radarChart=new Chart(c,{type:'radar',data:{labels:stats.map(d=>d.title),datasets:[{label:'% Başarı',data:stats.map(d=>d.total>0?(d.completed/d.total)*100:0),backgroundColor:'rgba(99, 102, 241, 0.15)',borderColor:'#6366f1',borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{r:{suggestedMin:0,suggestedMax:100,ticks:{display:false}}}}}); }
+        window.saveDailyLog=async()=>{const t=document.getElementById('new-log-text').value;if(!t||!isAdmin)return;const d=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});await setDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',`log-${Date.now()}`),{text:t,dateDisplay:d,createdAt:Date.now()});document.getElementById('new-log-text').value='';};
+        function renderDailyLogs(logs){const c=document.getElementById('daily-logs-display');if(!c)return;c.innerHTML=logs.length===0?'<p class="text-center text-slate-300 italic font-bold">Henüz not yok...</p>':'';logs.forEach(l=>{const d=document.createElement('div');d.className='glass-card p-6 rounded-[2rem] log-timeline-item shadow-sm';d.innerHTML=`<div class="flex justify-between items-start mb-2"><span class="text-[10px] font-black text-indigo-500 uppercase">${l.dateDisplay}</span>${isAdmin?`<button onclick="window.deleteLog('${l.id}')" class="text-rose-400 font-bold text-[9px]">SİL</button>`:''}</div><p class="text-slate-700 font-semibold text-sm">${l.text}</p>`;c.appendChild(d);});}
+        window.deleteLog=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',id));
+        window.updateValue=async(id,f,v)=>isAdmin&&await updateDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id),{[f]:(f==='completed'||f==='total')?parseInt(v)||0:v});
+        window.addNewCategory=async()=>isAdmin&&await setDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',`cat-${Date.now()}`),{title:'Yeni',completed:0,total:5,emoji:'📌',order:stats.length+1});
+        window.removeCategory=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id));
+        window.deleteTodo=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id));
+        window.addContactToCloud=async()=>{const n=document.getElementById('contact-name').value;if(!n||!isAdmin)return;const d={name:n,type:document.getElementById('contact-type').value,email:document.getElementById('contact-email').value,phone:document.getElementById('contact-phone').value,refName:document.getElementById('contact-ref-name').value,refPhone:document.getElementById('contact-ref-phone').value,note:document.getElementById('contact-note').value,updatedAt:Date.now()};const id=document.getElementById('contact-edit-id').value;if(id)await updateDoc(doc(db,'artifacts',appId,'public','data','randevular',id),d);else{d.createdAt=Date.now();await setDoc(doc(db,'artifacts',appId,'public','data','randevular',`c-${Date.now()}`),d);}window.resetContactForm();};
+        window.editContact=(id)=>{const c=contacts.find(i=>i.id===id);if(!c)return;document.getElementById('contact-edit-id').value=c.id;document.getElementById('contact-name').value=c.name;document.getElementById('contact-type').value=c.type;document.getElementById('contact-email').value=c.email;document.getElementById('contact-phone').value=c.phone;document.getElementById('contact-ref-name').value=c.refName;document.getElementById('contact-ref-phone').value=c.refPhone;document.getElementById('contact-note').value=c.note;document.getElementById('contact-form-title').innerText="Düzenle";document.getElementById('btn-cancel-edit').classList.remove('hidden');window.switchSidebarTab('contacts');if(document.getElementById('admin-panel').classList.contains('translate-x-full'))window.toggleAdmin();};
+        window.resetContactForm=()=>{['contact-edit-id','contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(i=>document.getElementById(i).value='');document.getElementById('contact-form-title').innerText="Yeni Kayıt";document.getElementById('btn-cancel-edit').classList.add('hidden');};
         window.deleteContact=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','randevular',id));
-        window.addQuoteToCloud=async()=>{const t=document.getElementById('new-quote-text').value; if(!t||!isAdmin)return; await setDoc(doc(db,'artifacts',appId,'public','data','sozler',`q-${Date.now()}`),{text:t,createdAt:Date.now()}); document.getElementById('new-quote-text').value='';};
+        window.addQuoteToCloud=async()=>{const t=document.getElementById('new-quote-text').value;if(!t||!isAdmin)return;await setDoc(doc(db,'artifacts',appId,'public','data','sozler',`q-${Date.now()}`),{text:t,createdAt:Date.now()});document.getElementById('new-quote-text').value='';};
         window.deleteQuote=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','sozler',id));
-        function renderQuotesAdmin(){const l=document.getElementById('quote-manager-list'); if(!l)return; l.innerHTML=quotes.map(q=>`<div class="p-3 bg-slate-50 border rounded-xl relative group"><p class="text-xs italic pr-6">"${q.text}"</p><button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[9px] opacity-0 group-hover:opacity-100">SİL</button></div>`).join('');}
-        window.switchSidebarTab=(t)=>{['stats','contacts','todos','quotes'].forEach(i=>{document.getElementById(`tab-${i}`).className=`tab-btn flex-1 ${i===t?'active':'inactive'}`; document.getElementById(`sidebar-${i}-content`).classList.toggle('hidden',i!==t);});};
+        function renderQuotesAdmin(){const l=document.getElementById('quote-manager-list');if(!l)return;l.innerHTML=quotes.map(q=>`<div class="p-3 bg-slate-50 border rounded-xl relative group"><p class="text-xs italic pr-6">"${q.text}"</p><button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[9px] opacity-0 group-hover:opacity-100">SİL</button></div>`).join('');}
+        window.switchSidebarTab=(t)=>{['stats','contacts','todos','quotes'].forEach(i=>{document.getElementById(`tab-${i}`).className=`tab-btn flex-1 ${i===t?'active':'inactive'}`;document.getElementById(`sidebar-${i}-content`).classList.toggle('hidden',i!==t);});};
         window.toggleAdmin=()=>document.getElementById('admin-panel').classList.toggle('translate-x-full');
         function renderCountdowns(){const l=document.getElementById('countdown-list');l.innerHTML='';deadlines.forEach(i=>{const d=Math.ceil((new Date(i.date)-new Date())/(1000*60*60*24));l.innerHTML+=`<div class="countdown-item"><span class="text-xs">${i.emoji}</span><span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${i.label}</span><span class="text-xs font-black text-indigo-600">${d>0?d+' gün':'Bitti'}</span></div>`;});}
         function updateContactDropdown(){const s=document.getElementById('contact-type');if(!s)return;const c=s.value;s.innerHTML='<option value="">Seç...</option>'+stats.map(i=>`<option value="${i.title}">${i.title}</option>`).join('');s.value=c;}
