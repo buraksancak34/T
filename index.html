@@ -8,94 +8,124 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap');
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh;
-            color: #1e293b;
+            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh; color: #1e293b;
         }
 
-        /* --- ARKA PLAN (DOĞA vs ENERJİ) --- */
-        .split-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: flex; }
-        .bg-nature { flex: 1; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); position: relative; overflow: hidden; }
-        .bg-nature::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10zm-20 20c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10z' fill='%2315803d' fill-rule='evenodd'/%3E%3C/svg%3E"); }
-        .bg-energy { flex: 1; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); position: relative; overflow: hidden; }
-        .bg-energy::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0l-5 20h10l-5 20 15-25h-10l5-15z' fill='%232563eb' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+        /* --- SİNEMATİK ARKA PLAN --- */
+        .cinematic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: linear-gradient(90deg, #bef264 0%, #a7f3d0 35%, #64748b 65%, #0f172a 100%);
+            overflow: hidden;
+        }
+        /* SOL: DOĞAL ORTAM */
+        .hills { position: absolute; bottom: -80px; left: 0; width: 55%; height: 250px; background: #84cc16; border-radius: 100% 100% 0 0; opacity: 0.5; z-index: 1; }
+        .hills::after { content: ''; position: absolute; bottom: 30px; left: -20%; width: 140%; height: 280px; background: #65a30d; border-radius: 80% 100% 0 0; opacity: 0.4; }
+        .sun { position: absolute; top: 5%; left: 10%; width: 100px; height: 100px; background: radial-gradient(circle, rgba(253,224,71,0.8) 0%, rgba(253,224,71,0) 70%); animation: sun-glow 6s infinite alternate; opacity: 0.7; z-index: 0; }
+        .solar-panel-group { position: absolute; bottom: 100px; left: 8%; z-index: 2; transform: perspective(600px) rotateX(30deg) rotateY(10deg) scale(0.9); opacity: 0.8; }
+        .panel { width: 50px; height: 35px; background: linear-gradient(135deg, #1e40af 0%, #60a5fa 100%); margin: 4px; display: inline-block; border: 1px solid #bfdbfe; position: relative; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .panel::after { content: ''; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%; background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.5) 50%, transparent 55%); animation: panel-shimmer 7s infinite linear; }
+        .turbine { position: absolute; bottom: 120px; width: 3px; height: 90px; background: #e2e8f0; z-index: 2; }
+        .turbine::before { content: ''; position: absolute; top: 0; left: -2px; width: 7px; height: 7px; background: #cbd5e1; border-radius: 50%; z-index: 3; }
+        .blades { position: absolute; top: 3px; left: 1.5px; width: 0; height: 0; animation: spin 6s linear infinite; }
+        .blade { position: absolute; top: 0; left: -1.5px; width: 3px; height: 55px; background: #f1f5f9; border-radius: 50% 50% 0 0; transform-origin: bottom center; }
+        .b1 { transform: rotate(0deg) translateY(-55px); } .b2 { transform: rotate(120deg) translateY(-55px); } .b3 { transform: rotate(240deg) translateY(-55px); }
+        .t1 { left: 20%; transform: scale(0.9); } .t2 { left: 35%; bottom: 160px; animation-duration: 8s; transform: scale(0.7); }
+        /* ORTA: İLETİM */
+        .power-line { position: absolute; top: 55%; left: 0; width: 100%; height: 3px; z-index: 3; background: linear-gradient(90deg, rgba(132,204,22,0.3) 0%, rgba(59,130,246,0.3) 50%, rgba(239,68,68,0.3) 100%); transform: rotate(-4deg); transform-origin: left; box-shadow: 0 0 10px rgba(59,130,246,0.2); }
+        .current-pulse { position: absolute; top: -3px; left: 0; width: 80px; height: 9px; background: linear-gradient(90deg, transparent, #fff, transparent); filter: blur(3px); opacity: 0.9; animation: electricity 3.5s linear infinite; }
+        /* SAĞ: SANAYİ */
+        .factory-silhouette { position: absolute; bottom: 15%; right: 5%; width: 220px; height: 140px; z-index: 1; background: #1e293b; opacity: 0.7; clip-path: polygon(10% 100%, 90% 100%, 90% 60%, 85% 60%, 85% 10%, 70% 10%, 70% 60%, 55% 60%, 55% 25%, 40% 25%, 40% 60%, 10% 60%); }
+        .chimney-smoke { position: absolute; bottom: 60%; right: 17%; width: 40px; height: 20px; z-index: 0; }
+        .puff { position: absolute; width: 35px; height: 35px; background: #334155; border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%; filter: blur(12px); opacity: 0; animation: billow 9s infinite linear; }
+        .p1 { animation-delay: 0s; } .p2 { animation-delay: 1.5s; right: -15px; } .p3 { animation-delay: 3s; left: -10px; } .p4 { animation-delay: 4.5s; } .p5 { animation-delay: 6s; right: -20px; } .p6 { animation-delay: 7.5s; left: -15px; }
+        .bad-spark { position: absolute; top: 25%; right: 12%; width: 180px; height: 180px; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%); opacity: 0; animation: harsh-spark 7s infinite; z-index: 0; }
 
-        .glass-card { background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(31, 38, 135, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* Animasyonlar */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes sun-glow { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.15); opacity: 0.85; } }
+        @keyframes panel-shimmer { 0% { transform: translate(-150%, -150%); } 30%, 100% { transform: translate(150%, 150%); } }
+        @keyframes electricity { 0% { left: -10%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: 110%; opacity: 0; } }
+        @keyframes billow { 0% { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 0.8; background: #334155; } 30% { opacity: 0.7; } 100% { transform: translateY(-300px) translateX(80px) scale(5) rotate(120deg); opacity: 0; background: #94a3b8; } }
+        @keyframes harsh-spark { 0%, 90%, 100% { opacity: 0; } 93%, 97% { opacity: 0.5; filter: brightness(2); } 95% { opacity: 0; } }
+
+        /* UI */
+        .glass-card { background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.4s; }
         .glass-card:hover { transform: translateY(-4px); border-color: #6366f1; }
-
-        /* Kart Stilleri */
-        .gold-card { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #fcd34d; box-shadow: 0 20px 50px rgba(251, 191, 36, 0.2); transform: scale(1.02); }
-        .dark-card { background: #f1f5f9; border: 1px solid #e2e8f0; opacity: 0.85; }
-
-        /* Alev Animasyonları */
-        @keyframes burn-gold { 0%,100% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; } 50% { text-shadow: 0 0 4px #fff, 0 -7px 15px #ffeb3b, -2px -15px 25px #ff9800; } }
-        @keyframes burn-max { 0%,100% { text-shadow: 0 0 5px #fff, 0 -8px 15px #ffd700, 0 -15px 30px #ff4500, 0 -25px 50px #ff0000; transform: scale(1); } 50% { transform: scale(1.05); } }
-        .flame-gold { color: #facc15; animation: burn-gold 1.5s infinite alternate; }
-        .flame-max { color: #fbbf24; animation: burn-max 0.8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* Diğer UI */
-        .admin-sidebar { background: rgba(255, 255, 255, 0.98); transition: transform 0.4s; box-shadow: -15px 0 45px rgba(0, 0, 0, 0.08); z-index: 999999; }
-        .custom-input { background: #fff!important; border: 2px solid #f1f5f9!important; padding: 12px!important; border-radius: 14px!important; width: 100%!important; outline: none; transition: 0.2s; }
+        .gold-card { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #fcd34d; transform: scale(1.02); }
+        .gold-card:hover { transform: scale(1.05); }
+        .dark-card { background: #f1f5f9; opacity: 0.9; }
+        .admin-sidebar { background: rgba(255, 255, 255, 0.98); transition: transform 0.4s; z-index: 999999; }
+        .custom-input { background: #fff!important; border: 2px solid #f1f5f9!important; padding: 12px!important; border-radius: 14px!important; width: 100%!important; outline: none; }
         .custom-input:focus { border-color: #6366f1!important; }
-        .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; text-transform: uppercase; cursor: pointer; }
-        .tab-btn.active { background: #6366f1; color: white; }
-        .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
+        .tab-btn { padding: 8px; border-radius: 10px; font-weight: 800; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+        .tab-btn.active { background: #6366f1; color: white; } .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
         .hidden-mode { display: none !important; }
-        .important-note { color: #ef4444 !important; font-weight: 800 !important; font-style: normal !important; }
-        .countdown-item { background: white; padding: 4px 10px; border-radius: 10px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 6px; }
-        .mode-indicator { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        .mode-guest { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-        .mode-admin { background: #6366f1; color: white; border: 1px solid #4f46e5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
-        .log-timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; }
-        .log-timeline-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; border: 2px solid white; }
+        .status-badge { padding: 6px 14px; border-radius: 30px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .badge-done { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; } 
+        .badge-pending { background: #fef9c3; color: #a16207; border: 1px solid #fde047; } 
+        .badge-other { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+        
+        .flame-gold { color: #facc15; animation: text-burn 1.5s infinite alternate; }
+        .flame-max { color: #fbbf24; animation: text-burn-max 0.8s infinite; }
+        @keyframes text-burn { 0% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b; } 100% { text-shadow: 0 0 8px #fff, 0 -8px 15px #facc15; } }
+        @keyframes text-burn-max { 0% { text-shadow: 0 0 5px #fff, 0 -8px 15px #fbbf24; } 50% { text-shadow: 0 -12px 20px #fbbf24, -5px -20px 40px #f59e0b; } 100% { text-shadow: 0 0 5px #fff, 0 -8px 15px #fbbf24; } }
         
         /* Slider */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #6366f1; cursor: pointer; margin-top: -7px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
-        
-        /* Kayan Yazı */
-        #ata-quote-wrapper { position: relative; overflow: hidden; height: 90px; width: 100%; }
-        .quote-slide { position: absolute; width: 100%; transition: transform 0.8s, opacity 0.5s; }
+
+        /* Quote (Tam Genişlik) */
+        #ata-quote-wrapper { position: relative; overflow: hidden; height: 70px; width: 100%; }
+        .quote-slide { position: absolute; width: 100%; transition: 0.8s; font-size: 1.25rem; color: #334155; font-weight: 700; border-left: 4px solid #6366f1; padding-left: 1rem; line-height: 1.4; font-style: italic; }
         .quote-enter { transform: translateX(100%); opacity: 0; }
         .quote-active { transform: translateX(0); opacity: 1; }
         .quote-exit { transform: translateX(-100%); opacity: 0; }
+        
+        .log-timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; }
+        .log-timeline-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; border: 2px solid white; }
     </style>
 </head>
 <body class="antialiased">
 
-    <div class="split-bg">
-        <div class="bg-nature"></div>
-        <div class="bg-energy"></div>
+    <div class="cinematic-bg">
+        <div class="hills"></div><div class="sun"></div>
+        <div class="solar-panel-group"><div class="panel"></div><div class="panel"></div><div class="panel"></div><div class="panel"></div><div class="panel"></div><div class="panel"></div></div>
+        <div class="turbine t1"><div class="blades"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div></div>
+        <div class="turbine t2"><div class="blades"><div class="blade b1"></div><div class="blade b2"></div><div class="blade b3"></div></div></div>
+        <div class="power-line"><div class="current-pulse"></div></div>
+        <div class="bad-spark"></div><div class="factory-silhouette"></div>
+        <div class="chimney-smoke"><div class="puff p1"></div><div class="puff p2"></div><div class="puff p3"></div><div class="puff p4"></div><div class="puff p5"></div><div class="puff p6"></div></div>
     </div>
 
-    <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-slate-100">
+    <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 admin-sidebar translate-x-full overflow-y-auto p-8">
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3 underline decoration-indigo-500">⚙️ Veri Merkezi</h2>
-            <button onclick="window.toggleAdmin()" class="text-slate-300 hover:text-slate-600 text-3xl">&times;</button>
+            <h2 class="text-2xl font-black text-slate-800 underline decoration-indigo-500">⚙️ Veri Merkezi</h2>
+            <button onclick="window.toggleAdmin()" class="text-3xl text-slate-400 hover:text-slate-600">&times;</button>
         </div>
-
         <div class="flex gap-1 mb-8 bg-slate-50 p-1 rounded-2xl">
-            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1 py-2">Sayılar</button>
-            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1 py-2">Kişiler</button>
-            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1 py-2">Görevler</button>
-            <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 py-2">Sözler</button>
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">SAYILAR</button>
+            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">KİŞİLER</button>
+            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1">GÖREVLER</button>
+            <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1">SÖZLER</button>
         </div>
         
         <div id="sidebar-stats-content">
             <div id="editor-list" class="space-y-4 mb-8"></div>
-            <button onclick="window.addNewCategory()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-lg">+ Yeni Kategori</button>
+            <button onclick="window.addNewCategory()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-lg">+ Kategori Ekle</button>
+            <button onclick="window.seedDataToCloud()" class="w-full mt-4 text-xs font-bold text-slate-400 uppercase hover:text-indigo-600">Varsayılana Dön (Yeni İkonlar)</button>
         </div>
 
         <div id="sidebar-contacts-content" class="hidden space-y-5">
             <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase" id="contact-form-title">Yeni Kayıt</h3><button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold">İPTAL</button></div>
-            <div class="space-y-4">
+            <div class="space-y-3">
                 <input type="hidden" id="contact-edit-id"><input type="text" id="contact-name" placeholder="Ad Soyad" class="custom-input"><select id="contact-type" class="custom-input"></select><input type="email" id="contact-email" placeholder="E-posta" class="custom-input"><input type="tel" id="contact-phone" placeholder="Telefon" class="custom-input">
-                <div class="pt-4 border-t border-slate-100"><label class="text-[10px] font-bold text-slate-400 mb-2 block">REFERANS</label><input type="text" id="contact-ref-name" placeholder="Referans İsmi" class="custom-input mb-3"><input type="tel" id="contact-ref-phone" placeholder="Referans Tel" class="custom-input"></div>
-                <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-24"></textarea>
+                <div class="border-t pt-3"><label class="text-[10px] font-bold text-slate-400">REFERANS</label><input type="text" id="contact-ref-name" placeholder="İsim" class="custom-input mb-2"><input type="tel" id="contact-ref-phone" placeholder="Telefon" class="custom-input"></div>
+                <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-20"></textarea>
                 <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg">KAYDET</button>
             </div>
         </div>
@@ -103,43 +133,56 @@
         <div id="sidebar-todos-content" class="hidden space-y-5">
             <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase" id="todo-form-title">Yeni Görev</h3><button onclick="window.resetTodoForm()" id="btn-cancel-todo" class="hidden text-rose-500 text-[10px] font-bold">İPTAL</button></div>
             <div class="space-y-4">
-                <input type="hidden" id="todo-edit-id"><input type="text" id="todo-task" placeholder="Görev Başlığı..." class="custom-input">
+                <input type="hidden" id="todo-edit-id"><input type="text" id="todo-task" placeholder="Görev..." class="custom-input">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <div class="flex justify-between mb-2"><label class="text-[10px] font-bold text-slate-500 uppercase">Tamamlanma</label><span id="todo-progress-display" class="text-xs font-black text-indigo-600">%0</span></div>
+                    <div class="flex justify-between mb-2"><label class="text-[10px] font-bold text-slate-500 uppercase">İlerleme</label><span id="todo-progress-display" class="text-xs font-black text-indigo-600">%0</span></div>
                     <input type="range" id="todo-progress" min="0" max="100" step="10" value="0" oninput="document.getElementById('todo-progress-display').innerText = '%' + this.value">
                 </div>
-                <textarea id="todo-desc" placeholder="Açıklama / Not..." class="custom-input h-24"></textarea>
-                <button onclick="window.addTodoToCloud()" id="btn-save-todo" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg">GÖREVİ KAYDET</button>
+                <select id="todo-status" class="custom-input"><option value="Yapılmadı">Yapılmadı</option><option value="Yapıldı">Yapıldı</option><option value="Diğer">Diğer</option></select>
+                <textarea id="todo-desc" placeholder="Detay..." class="custom-input h-20"></textarea>
+                <button onclick="window.addTodoToCloud()" id="btn-save-todo" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg">KAYDET</button>
             </div>
         </div>
 
         <div id="sidebar-quotes-content" class="hidden space-y-5">
-            <textarea id="new-quote-text" placeholder="Yeni vecize..." class="custom-input h-24"></textarea><button onclick="window.addQuoteToCloud()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">EKLE</button><div id="quote-manager-list" class="pt-4 space-y-3"></div>
+            <textarea id="new-quote-text" placeholder="Söz..." class="custom-input h-24"></textarea><button onclick="window.addQuoteToCloud()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm">EKLE</button><div id="quote-manager-list" class="pt-4 space-y-2"></div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-6 py-12 relative z-10">
-        <header class="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
-            <div class="w-full md:w-auto">
-                <h1 class="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter leading-none m-0 uppercase drop-shadow-sm">İLKER'İN <span class="text-indigo-600 italic">İZLENCESİ</span></h1>
-                <p class="text-slate-500 text-lg mt-3 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
-                <div class="mt-6 flex flex-wrap gap-3 items-center">
-                    <div id="mode-status" class="mode-indicator mode-guest shadow-sm"><span id="mode-icon">👤</span> <span id="mode-text">Misafir Modu</span></div>
-                    <button id="btn-login-toggle" onclick="window.handleAuth()" class="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 underline cursor-pointer bg-white/50 px-3 py-1 rounded-lg">Yönetici Girişi</button>
-                    <button onclick="window.toggleAdmin()" id="btn-master-manage" class="hidden-mode bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase hover:shadow-lg cursor-pointer">🛠️ Yönet</button>
+        
+        <header class="mb-12">
+            <div class="flex flex-col xl:flex-row justify-between items-start gap-6">
+                
+                <div class="flex-1 min-w-[300px]">
+                    <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter uppercase leading-tight drop-shadow-sm flex flex-wrap gap-x-4">
+                        <span>İLKER'İN</span> <span class="text-indigo-600 italic">İZLENCESİ</span>
+                    </h1>
+                    <p class="text-slate-500 text-lg mt-2 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
+                    
+                    <div class="mt-4 flex flex-wrap gap-3 items-center">
+                        <div id="mode-status" class="mode-indicator mode-guest shadow-sm"><span id="mode-icon">👤</span> <span id="mode-text">Misafir Modu</span></div>
+                        <button id="btn-login-toggle" onclick="window.handleAuth()" class="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 underline bg-white/60 px-3 py-1 rounded-lg cursor-pointer">Yönetici Girişi</button>
+                        <button onclick="window.toggleAdmin()" id="btn-master-manage" class="hidden-mode bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase hover:shadow-lg cursor-pointer">🛠️ Yönet</button>
+                    </div>
                 </div>
-                <div id="ata-quote-container" class="max-w-xl w-full mt-8"><div id="ata-quote-wrapper"></div><p id="ata-author" class="text-indigo-600 text-[10px] font-black uppercase tracking-widest mt-2 pl-5">Mustafa Kemal Atatürk</p></div>
+
+                <div class="flex flex-col md:flex-row gap-4 w-full xl:w-auto items-start">
+                    <div id="daily-log-input-area" class="hidden-mode w-full md:w-64 glass-card p-4 rounded-[1.5rem] border border-indigo-200 shadow-md">
+                        <h3 class="text-[10px] font-black text-indigo-600 uppercase mb-2 flex items-center gap-2">🚀 Bugün ne yaptın?</h3>
+                        <textarea id="new-log-text" class="custom-input w-full text-xs mb-2 resize-none bg-slate-50 h-16 p-2" placeholder="Not düş..."></textarea>
+                        <button onclick="window.saveDailyLog()" class="w-full py-1.5 bg-indigo-600 text-white rounded-lg font-bold text-[10px] hover:bg-indigo-700 transition-all shadow-sm">KAYDET</button>
+                    </div>
+                    <div class="w-full md:w-64 glass-card p-4 rounded-[1.5rem] shadow-sm">
+                        <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mb-2 text-center">Akademik Takvim</h3>
+                        <div id="countdown-list" class="space-y-1.5"></div>
+                    </div>
+                </div>
             </div>
-            <div class="flex flex-col gap-4 min-w-[320px]">
-                <div class="glass-card p-5 rounded-[2rem] shadow-sm">
-                    <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mb-1 text-center">Akademik Takvim & Geri Sayım</h3>
-                    <div id="countdown-list" class="space-y-1.5"></div>
-                </div>
-                <div id="daily-log-input-area" class="hidden-mode glass-card p-6 rounded-[2rem] border-2 border-indigo-200 shadow-lg">
-                    <h3 class="text-[10px] font-black text-indigo-600 uppercase mb-3">🚀 Bugün tezin için ne yaptın?</h3>
-                    <textarea id="new-log-text" class="custom-input h-24 text-sm mb-4" placeholder="İlerlemeni buraya not düş..."></textarea>
-                    <button onclick="window.saveDailyLog()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-md">GÜNLÜĞE EKLE</button>
-                </div>
+
+            <div id="ata-quote-container" class="w-full mt-12 pl-2">
+                <div id="ata-quote-wrapper"></div>
+                <p class="text-indigo-600 text-sm font-black uppercase tracking-[0.2em] mt-2 pl-4 opacity-80">Mustafa Kemal Atatürk</p>
             </div>
         </header>
 
@@ -222,11 +265,7 @@
             { label: 'Veri Analizi', date: '2026-04-05', emoji: '🔍' }
         ];
 
-        // GÜÇLENDİRİLMİŞ MASKELEME (Hata önleyici)
-        const maskString = (str) => {
-            if (!str || typeof str !== 'string') return '-';
-            return str.split(' ').map(w => w.length > 0 ? w[0] + '*'.repeat(w.length - 1) : '').join(' ');
-        };
+        const maskString = (str) => { if (!str || typeof str !== 'string') return '-'; return str.split(' ').map(w => w.length>0 ? w[0] + '*'.repeat(w.length - 1) : '').join(' '); };
 
         const startApp = async () => {
             const app = initializeApp(firebaseConfig);
@@ -241,52 +280,29 @@
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), s => { stats = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0)); renderDash(); renderStatsEditor(); updateRadar(); updateContactDropdown(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), s => { 
                 contacts = s.docs.map(d => ({id:d.id,...d.data()})); 
-                renderContacts(); // Listenin tamamı burada tetiklenir
+                renderContacts(); 
             });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), s => { todos = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt); renderTodos(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sozler'), s => { quotes = s.docs.map(d => ({id:d.id,...d.data()})); renderQuotesAdmin(); startQuoteRotation(); });
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'tez_gunlugu'), orderBy('createdAt', 'desc')), s => { renderDailyLogs(s.docs.map(d => ({id:d.id,...d.data()}))); });
         };
 
-        // --- CONTACTS RENDER (HATA AYIKLANDI) ---
+        // --- CONTACTS RENDER ---
         function renderContacts() {
             const b = document.getElementById('contacts-table-body');
             if(!b) return;
             b.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">Liste boş...</td></tr>' : '';
-            
             contacts.forEach(c => {
                 try {
                     const tr = document.createElement('tr');
                     tr.className = 'hover:bg-indigo-50/30 transition-colors border-b border-slate-50 text-sm';
-                    
-                    // Güvenli veri çekme
-                    const rawName = c.name || "";
-                    const rawRef = c.refName || "";
-                    const rawEmail = c.email || "";
-                    const rawPhone = c.phone || "";
-                    const rawRefPhone = c.refPhone || "";
-                    const rawNote = c.note || "";
-
-                    const n = isAdmin ? rawName : maskString(rawName);
-                    const r = isAdmin ? (rawRef || '-') : maskString(rawRef);
-                    const e = isAdmin ? `📧 ${rawEmail || '-'}<br>📞 ${rawPhone || '-'}` : '**********';
-                    const refP = isAdmin ? `📱 ${rawRefPhone || '-'}` : '';
-                    const no = isAdmin ? (rawNote || '-') : '********************';
-
-                    tr.innerHTML = `
-                        <td class="px-8 py-6 font-bold text-slate-800">${n}</td>
-                        <td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${c.type || '-'}</span></td>
-                        <td class="px-8 py-6 text-slate-500 font-medium">${e}</td>
-                        <td class="px-8 py-6 text-slate-500">👤 ${r}<br><span class="text-xs">${refP}</span></td>
-                        <td class="px-8 py-6 text-xs italic text-slate-400 max-w-[200px] truncate">${no}</td>
-                        <td class="px-8 py-6 text-right">
-                            ${isAdmin ? `<button onclick="window.editContact('${c.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-'}
-                        </td>
-                    `;
+                    const n = isAdmin ? (c.name||'') : maskString(c.name||'');
+                    const r = isAdmin ? (c.refName||'-') : maskString(c.refName||'-');
+                    const e = isAdmin ? `📧 ${c.email||'-'}<br>📞 ${c.phone||'-'}` : '**********';
+                    const no = isAdmin ? (c.note||'-') : '********************';
+                    tr.innerHTML = `<td class="px-8 py-6 font-bold text-slate-800">${n}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${c.type||'-'}</span></td><td class="px-8 py-6 text-slate-500 font-medium">${e}</td><td class="px-8 py-6 text-slate-500">👤 ${r}<br><span class="text-xs">${isAdmin?`📱 ${c.refPhone||'-'}`:''}</span></td><td class="px-8 py-6 text-xs italic text-slate-400 max-w-[200px] truncate">${no}</td><td class="px-8 py-6 text-right">${isAdmin?`<button onclick="window.editContact('${c.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>`:'-'}</td>`;
                     b.appendChild(tr);
-                } catch (err) {
-                    console.error("Satır render hatası:", err); // Hatayı konsola yaz, döngüyü kırma
-                }
+                } catch (err) { console.error("Render hatası:", err); }
             });
         }
 
@@ -315,82 +331,28 @@
             summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Başarı</p><p class="text-5xl font-black ${percentageClass} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kategori</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
         }
 
-        // --- GÖREVLER (Slider'lı) ---
+        // --- GÖREVLER (Slider) ---
         function renderTodos() {
-            const b = document.getElementById('todo-table-body');
-            if(!b) return;
-            b.innerHTML = '';
+            const b = document.getElementById('todo-table-body'); if(!b) return; b.innerHTML = '';
             todos.forEach(t => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm';
-                
+                const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm';
                 const progress = parseInt(t.progress || 0);
-                let barColor = 'bg-rose-500'; // 0-20
-                if(progress > 20) barColor = 'bg-orange-500'; // 30-40
-                if(progress > 40) barColor = 'bg-blue-500';   // 50-60
-                if(progress > 60) barColor = 'bg-emerald-500'; // 70-90
-                if(progress == 100) barColor = 'bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.8)]'; // 100
-
-                const actions = isAdmin ? 
-                    `<button onclick="window.editTodo('${t.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button>
-                     <button onclick="window.deleteTodo('${t.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-';
-
-                tr.innerHTML = `
-                    <td class="px-8 py-6 font-bold text-slate-800">${t.task}</td>
-                    <td class="px-8 py-6">
-                        <div class="flex items-center gap-3">
-                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden shadow-inner">
-                                <div class="h-full ${barColor} transition-all duration-1000" style="width:${progress}%"></div>
-                            </div>
-                            <span class="text-[10px] font-black text-slate-500 w-8 text-right">%${progress}</span>
-                        </div>
-                    </td>
-                    <td class="px-8 py-6 italic text-slate-500 text-xs">${isAdmin?(t.desc||'-'):'**********'}</td>
-                    <td class="px-8 py-6 text-right">${actions}</td>
-                `;
+                let barColor = 'bg-rose-500'; 
+                if(progress > 20) barColor = 'bg-orange-500'; if(progress > 40) barColor = 'bg-blue-500'; if(progress > 60) barColor = 'bg-emerald-500'; if(progress == 100) barColor = 'bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.8)]';
+                let badgeClass = 'badge-pending'; if(t.status=='Yapıldı') badgeClass='badge-done'; else if(t.status=='Diğer') badgeClass='badge-other';
+                const actions = isAdmin ? `<button onclick="window.editTodo('${t.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button><button onclick="window.deleteTodo('${t.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-';
+                tr.innerHTML = `<td class="px-8 py-6 font-bold text-slate-800">${t.task}</td><td class="px-8 py-6"><div class="flex items-center gap-3"><div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden shadow-inner"><div class="h-full ${barColor} transition-all duration-1000" style="width:${progress}%"></div></div><span class="text-[10px] font-black text-slate-500 w-8 text-right">%${progress}</span></div><div class="mt-1"><span class="status-badge ${badgeClass} scale-75 origin-left inline-block">${t.status}</span></div></td><td class="px-8 py-6 italic text-slate-500 text-xs">${isAdmin?(t.desc||'-'):'**********'}</td><td class="px-8 py-6 text-right">${actions}</td>`;
                 b.appendChild(tr);
             });
         }
 
-        // --- TODO EDIT ---
-        window.editTodo = (id) => {
-            const t = todos.find(i => i.id === id); if(!t) return;
-            document.getElementById('todo-edit-id').value = t.id;
-            document.getElementById('todo-task').value = t.task;
-            document.getElementById('todo-progress').value = t.progress || 0;
-            document.getElementById('todo-progress-display').innerText = '%' + (t.progress || 0);
-            document.getElementById('todo-desc').value = t.desc || '';
-            document.getElementById('todo-form-title').innerText = "Görevi Düzenle";
-            document.getElementById('btn-save-todo').innerText = "GÜNCELLE";
-            document.getElementById('btn-cancel-todo').classList.remove('hidden');
-            window.switchSidebarTab('todos');
-            if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
-        };
-        window.resetTodoForm = () => {
-            document.getElementById('todo-edit-id').value = '';
-            document.getElementById('todo-task').value = '';
-            document.getElementById('todo-progress').value = 0;
-            document.getElementById('todo-progress-display').innerText = '%0';
-            document.getElementById('todo-desc').value = '';
-            document.getElementById('todo-form-title').innerText = "Yeni Görev";
-            document.getElementById('btn-save-todo').innerText = "GÖREVİ KAYDET";
-            document.getElementById('btn-cancel-todo').classList.add('hidden');
-        };
-        window.addTodoToCloud = async () => {
-            const id = document.getElementById('todo-edit-id').value;
-            const task = document.getElementById('todo-task').value;
-            if(!task || !isAdmin) return;
-            const data = { task, progress: document.getElementById('todo-progress').value, desc: document.getElementById('todo-desc').value, createdAt: Date.now() };
-            if(id) await updateDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id), data);
-            else await setDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',`t-${Date.now()}`), data);
-            window.resetTodoForm();
-        };
+        // --- YÖNETİM ---
+        window.editTodo=(id)=>{const t=todos.find(i=>i.id===id);if(!t)return;document.getElementById('todo-edit-id').value=t.id;document.getElementById('todo-task').value=t.task;document.getElementById('todo-progress').value=t.progress||0;document.getElementById('todo-progress-display').innerText='%'+(t.progress||0);document.getElementById('todo-desc').value=t.desc||'';document.getElementById('todo-status').value=t.status;document.getElementById('todo-form-title').innerText="Düzenle";document.getElementById('btn-save-todo').innerText="GÜNCELLE";document.getElementById('btn-cancel-todo').classList.remove('hidden');window.switchSidebarTab('todos');if(document.getElementById('admin-panel').classList.contains('translate-x-full'))window.toggleAdmin();};
+        window.resetTodoForm=()=>{document.getElementById('todo-edit-id').value='';document.getElementById('todo-task').value='';document.getElementById('todo-progress').value=0;document.getElementById('todo-progress-display').innerText='%0';document.getElementById('todo-desc').value='';document.getElementById('todo-form-title').innerText="Yeni Görev";document.getElementById('btn-save-todo').innerText="KAYDET";document.getElementById('btn-cancel-todo').classList.add('hidden');};
+        window.addTodoToCloud=async()=>{const id=document.getElementById('todo-edit-id').value;const t=document.getElementById('todo-task').value;if(!t||!isAdmin)return;const d={task:t,progress:document.getElementById('todo-progress').value,status:document.getElementById('todo-status').value,desc:document.getElementById('todo-desc').value,createdAt:Date.now()};if(id)await updateDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id),d);else await setDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',`t-${Date.now()}`),d);window.resetTodoForm();};
 
-        // --- AUTH & UI ---
-        window.handleAuth = async () => {
-            if (!isAdmin) { if (prompt("Şifre:") === "531") { isAdmin=true; await saveAdminStatus(true); updateUIForMode(); } else alert("Hata"); }
-            else { if (confirm("Çıkış?")) { isAdmin=false; await saveAdminStatus(false); updateUIForMode(); } }
-        };
+        // --- AUTH ---
+        window.handleAuth = async () => { if (!isAdmin) { if (prompt("Şifre:") === "531") { isAdmin=true; await saveAdminStatus(true); updateUIForMode(); } else alert("Hata"); } else { if (confirm("Çıkış?")) { isAdmin=false; await saveAdminStatus(false); updateUIForMode(); } } };
         async function checkAdminStatus(uid) { try { const d=await getDoc(doc(db,'artifacts',appId,'users',uid,'permissions','adminStatus')); if(d.exists()&&d.data().isAuthorized) isAdmin=true; updateUIForMode(); } catch(e){isAdmin=false;updateUIForMode();} }
         async function saveAdminStatus(s) { if(auth.currentUser) await setDoc(doc(db,'artifacts',appId,'users',auth.currentUser.uid,'permissions','adminStatus'),{isAuthorized:s,updatedAt:Date.now()}); }
         function updateUIForMode() {
@@ -407,7 +369,7 @@
             renderContacts(); renderTodos();
         }
 
-        // --- HELPER & CRUD ---
+        // --- CRUD HELPER ---
         function renderStatsEditor() { const l=document.getElementById('editor-list'); if(!l)return; l.innerHTML=stats.map(i=>`<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl relative shadow-sm"><button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[10px] border-none bg-transparent cursor-pointer">Sil</button><div class="space-y-3 pt-2"><input type="text" value="${i.title}" class="custom-input h-10 text-xs font-bold" onchange="window.updateValue('${i.id}', 'title', this.value)"><div class="grid grid-cols-2 gap-2"><div><label class="text-[8px] font-black text-slate-400 uppercase">Biten</label><input type="number" value="${i.completed}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div><div><label class="text-[8px] font-black text-slate-400 uppercase">Hedef</label><input type="number" value="${i.total}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'total', this.value)"></div></div></div></div>`).join(''); }
         function updateRadar() { const c=document.getElementById('radarChart')?.getContext('2d'); if(!c)return; if(radarChart)radarChart.destroy(); radarChart=new Chart(c,{type:'radar',data:{labels:stats.map(d=>d.title),datasets:[{label:'% Başarı',data:stats.map(d=>d.total>0?(d.completed/d.total)*100:0),backgroundColor:'rgba(99, 102, 241, 0.15)',borderColor:'#6366f1',borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{r:{suggestedMin:0,suggestedMax:100,ticks:{display:false}}}}}); }
         window.saveDailyLog=async()=>{const t=document.getElementById('new-log-text').value;if(!t||!isAdmin)return;const d=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});await setDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',`log-${Date.now()}`),{text:t,dateDisplay:d,createdAt:Date.now()});document.getElementById('new-log-text').value='';};
@@ -418,18 +380,20 @@
         window.removeCategory=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id));
         window.deleteTodo=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id));
         window.addContactToCloud=async()=>{const n=document.getElementById('contact-name').value;if(!n||!isAdmin)return;const d={name:n,type:document.getElementById('contact-type').value,email:document.getElementById('contact-email').value,phone:document.getElementById('contact-phone').value,refName:document.getElementById('contact-ref-name').value,refPhone:document.getElementById('contact-ref-phone').value,note:document.getElementById('contact-note').value,updatedAt:Date.now()};const id=document.getElementById('contact-edit-id').value;if(id)await updateDoc(doc(db,'artifacts',appId,'public','data','randevular',id),d);else{d.createdAt=Date.now();await setDoc(doc(db,'artifacts',appId,'public','data','randevular',`c-${Date.now()}`),d);}window.resetContactForm();};
-        window.editContact=(id)=>{const c=contacts.find(i=>i.id===id);if(!c)return;document.getElementById('contact-edit-id').value=c.id;document.getElementById('contact-name').value=c.name;document.getElementById('contact-type').value=c.type;document.getElementById('contact-email').value=c.email;document.getElementById('contact-phone').value=c.phone;document.getElementById('contact-ref-name').value=c.refName;document.getElementById('contact-ref-phone').value=c.refPhone;document.getElementById('contact-note').value=c.note;document.getElementById('contact-form-title').innerText="Düzenle";document.getElementById('btn-cancel-edit').classList.remove('hidden');window.switchSidebarTab('contacts');if(document.getElementById('admin-panel').classList.contains('translate-x-full'))window.toggleAdmin();};
         window.resetContactForm=()=>{['contact-edit-id','contact-name','contact-email','contact-phone','contact-ref-name','contact-ref-phone','contact-note'].forEach(i=>document.getElementById(i).value='');document.getElementById('contact-form-title').innerText="Yeni Kayıt";document.getElementById('btn-cancel-edit').classList.add('hidden');};
+        window.editContact=(id)=>{const c=contacts.find(i=>i.id===id);if(!c)return;document.getElementById('contact-edit-id').value=c.id;document.getElementById('contact-name').value=c.name;document.getElementById('contact-type').value=c.type;document.getElementById('contact-email').value=c.email;document.getElementById('contact-phone').value=c.phone;document.getElementById('contact-ref-name').value=c.refName;document.getElementById('contact-ref-phone').value=c.refPhone;document.getElementById('contact-note').value=c.note;document.getElementById('contact-form-title').innerText="Düzenle";document.getElementById('btn-cancel-edit').classList.remove('hidden');window.switchSidebarTab('contacts');if(document.getElementById('admin-panel').classList.contains('translate-x-full'))window.toggleAdmin();};
         window.deleteContact=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','randevular',id));
         window.addQuoteToCloud=async()=>{const t=document.getElementById('new-quote-text').value;if(!t||!isAdmin)return;await setDoc(doc(db,'artifacts',appId,'public','data','sozler',`q-${Date.now()}`),{text:t,createdAt:Date.now()});document.getElementById('new-quote-text').value='';};
         window.deleteQuote=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','sozler',id));
         function renderQuotesAdmin(){const l=document.getElementById('quote-manager-list');if(!l)return;l.innerHTML=quotes.map(q=>`<div class="p-3 bg-slate-50 border rounded-xl relative group"><p class="text-xs italic pr-6">"${q.text}"</p><button onclick="window.deleteQuote('${q.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[9px] opacity-0 group-hover:opacity-100">SİL</button></div>`).join('');}
         window.switchSidebarTab=(t)=>{['stats','contacts','todos','quotes'].forEach(i=>{document.getElementById(`tab-${i}`).className=`tab-btn flex-1 ${i===t?'active':'inactive'}`;document.getElementById(`sidebar-${i}-content`).classList.toggle('hidden',i!==t);});};
         window.toggleAdmin=()=>document.getElementById('admin-panel').classList.toggle('translate-x-full');
-        function renderCountdowns(){const l=document.getElementById('countdown-list');l.innerHTML='';deadlines.forEach(i=>{const d=Math.ceil((new Date(i.date)-new Date())/(1000*60*60*24));l.innerHTML+=`<div class="countdown-item"><span class="text-xs">${i.emoji}</span><span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${i.label}</span><span class="text-xs font-black text-indigo-600">${d>0?d+' gün':'Bitti'}</span></div>`;});}
+        // COUNTER FIX (GECE YARISI SIFIRLAMA)
+        function renderCountdowns(){const l=document.getElementById('countdown-list');l.innerHTML='';const now=new Date(); now.setHours(0,0,0,0); deadlines.forEach(i=>{const t=new Date(i.date); t.setHours(0,0,0,0); const d=Math.ceil((t-now)/(1000*60*60*24));l.innerHTML+=`<div class="countdown-item"><span class="text-xs">${i.emoji}</span><span class="text-[10px] font-bold text-slate-400 flex-1 truncate">${i.label}</span><span class="text-xs font-black text-indigo-600">${d>0?d+' gün':(d===0?'BUGÜN':'Bitti')}</span></div>`;});}
         function updateContactDropdown(){const s=document.getElementById('contact-type');if(!s)return;const c=s.value;s.innerHTML='<option value="">Seç...</option>'+stats.map(i=>`<option value="${i.title}">${i.title}</option>`).join('');s.value=c;}
-        function startQuoteRotation(){const w=document.getElementById('ata-quote-wrapper');if(!w||quotes.length===0)return;if(quoteInterval)clearInterval(quoteInterval);const disp=()=>{const n=(currentQuoteIndex+1)%quotes.length;const t=quotes[n]?.text||"";const e=document.createElement('p');e.className='quote-slide quote-enter text-slate-700 text-sm italic font-semibold border-l-4 border-indigo-400 pl-5 py-2';e.innerText=`"${t}"`;w.appendChild(e);setTimeout(()=>{const c=w.querySelector('.quote-active');if(c){c.classList.replace('quote-active','quote-exit');setTimeout(()=>c.remove(),800);}e.classList.replace('quote-enter','quote-active');},50);currentQuoteIndex=n;};disp();quoteInterval=setInterval(disp,15000);}
-        window.seedDataToCloud=async()=>{if(!isAdmin||!confirm('Reset?'))return;const s=await getDocs(collection(db,'artifacts',appId,'public','data','gorusmeler'));for(const d of s.docs)await deleteDoc(d.ref);const init=[{title:'Akademisyenler',completed:11,total:11,emoji:'👨‍🏫',order:1},{title:'Sivil Toplum',completed:5,total:6,emoji:'🌳',order:2},{title:'Bürokratlar',completed:4,total:4,emoji:'🏛️',order:3},{title:'Milletvekilleri',completed:2,total:6,emoji:'💼',order:4}];for(const i of init)await setDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',i.title.toLowerCase()),i);};
+        function startQuoteRotation(){const w=document.getElementById('ata-quote-wrapper');if(!w||quotes.length===0)return;if(quoteInterval)clearInterval(quoteInterval);const disp=()=>{const n=(currentQuoteIndex+1)%quotes.length;const t=quotes[n]?.text||"";const e=document.createElement('p');e.className='quote-slide quote-enter font-handwriting italic pl-2';e.innerText=`"${t}"`;w.appendChild(e);setTimeout(()=>{const c=w.querySelector('.quote-active');if(c){c.classList.replace('quote-active','quote-exit');setTimeout(()=>c.remove(),800);}e.classList.replace('quote-enter','quote-active');},50);currentQuoteIndex=n;};disp();quoteInterval=setInterval(disp,15000);}
+        // LOGO UPDATE
+        window.seedDataToCloud=async()=>{if(!isAdmin||!confirm('İkonlar güncellenecek?'))return;const s=await getDocs(collection(db,'artifacts',appId,'public','data','gorusmeler'));for(const d of s.docs)await deleteDoc(d.ref);const init=[{title:'Akademisyenler',completed:11,total:11,emoji:'🎓',order:1},{title:'Sivil Toplum',completed:5,total:6,emoji:'🌳',order:2},{title:'Bürokratlar',completed:4,total:4,emoji:'🕴️',order:3},{title:'Milletvekilleri',completed:2,total:6,emoji:'🏛️',order:4},{title:'Enerji Sektörü',completed:1,total:4,emoji:'⚡',order:5},{title:'Gazeteciler',completed:0,total:2,emoji:'📰',order:6}];for(const i of init)await setDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',i.title.toLowerCase()),i);};
 
         startApp();
     </script>
