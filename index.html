@@ -12,93 +12,65 @@
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #f6f8fd 0%, #f1f4ff 100%);
+            margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh;
             color: #1e293b;
-            min-height: 100vh;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 40px rgba(31, 38, 135, 0.04);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* --- ARKA PLAN (DOĞA vs ENERJİ) --- */
+        .split-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: flex; }
+        .bg-nature { flex: 1; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); position: relative; overflow: hidden; }
+        .bg-nature::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10zm-20 20c0-5 5-10 10-10s10 5 10 10-5 10-10 10-10-5-10-10z' fill='%2315803d' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+        .bg-energy { flex: 1; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); position: relative; overflow: hidden; }
+        .bg-energy::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0l-5 20h10l-5 20 15-25h-10l5-15z' fill='%232563eb' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+
+        .glass-card { background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); box-shadow: 0 10px 40px rgba(31, 38, 135, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass-card:hover { transform: translateY(-4px); border-color: #6366f1; }
 
-        .gold-card {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border: 2px solid #fcd34d;
-            box-shadow: 0 20px 50px rgba(251, 191, 36, 0.2);
-            transform: scale(1.02);
-            transition: all 0.4s ease;
-        }
-        .gold-card:hover { transform: scale(1.05); box-shadow: 0 25px 60px rgba(251, 191, 36, 0.3); }
+        /* Kart Stilleri */
+        .gold-card { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #fcd34d; box-shadow: 0 20px 50px rgba(251, 191, 36, 0.2); transform: scale(1.02); }
+        .dark-card { background: #f1f5f9; border: 1px solid #e2e8f0; opacity: 0.85; }
 
-        .dark-card {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            opacity: 0.85;
-            transition: all 0.3s ease;
-        }
-        .dark-card:hover { opacity: 1; border-color: #94a3b8; transform: translateY(-2px); }
+        /* Alev Animasyonları */
+        @keyframes burn-gold { 0%,100% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; } 50% { text-shadow: 0 0 4px #fff, 0 -7px 15px #ffeb3b, -2px -15px 25px #ff9800; } }
+        @keyframes burn-max { 0%,100% { text-shadow: 0 0 5px #fff, 0 -8px 15px #ffd700, 0 -15px 30px #ff4500, 0 -25px 50px #ff0000; transform: scale(1); } 50% { transform: scale(1.05); } }
+        .flame-gold { color: #facc15; animation: burn-gold 1.5s infinite alternate; }
+        .flame-max { color: #fbbf24; animation: burn-max 0.8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .admin-sidebar {
-            background: rgba(255, 255, 255, 0.98);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -15px 0 45px rgba(0, 0, 0, 0.08);
-            z-index: 999999;
-        }
-
-        .custom-input {
-            background: #ffffff !important; border: 2px solid #f1f5f9 !important;
-            padding: 12px !important; border-radius: 14px !important; width: 100% !important;
-            font-size: 14px !important; outline: none; transition: all 0.2s;
-        }
-        .custom-input:focus { border-color: #6366f1 !important; }
-
-        .chart-container { position: relative; width: 100%; height: 350px; }
+        /* Diğer UI */
+        .admin-sidebar { background: rgba(255, 255, 255, 0.98); transition: transform 0.4s; box-shadow: -15px 0 45px rgba(0, 0, 0, 0.08); z-index: 999999; }
+        .custom-input { background: #fff!important; border: 2px solid #f1f5f9!important; padding: 12px!important; border-radius: 14px!important; width: 100%!important; outline: none; transition: 0.2s; }
+        .custom-input:focus { border-color: #6366f1!important; }
         .tab-btn { padding: 8px 4px; font-weight: 800; font-size: 10px; border-radius: 10px; text-transform: uppercase; cursor: pointer; }
         .tab-btn.active { background: #6366f1; color: white; }
         .tab-btn.inactive { background: #f8fafc; color: #94a3b8; }
         .hidden-mode { display: none !important; }
         .important-note { color: #ef4444 !important; font-weight: 800 !important; font-style: normal !important; }
-        
-        /* Renkli Durum Badge'leri */
-        .status-badge { padding: 6px 14px; border-radius: 30px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-done { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-        .badge-pending { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
-        .badge-other { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
-
-        /* Alev Efektleri */
-        @keyframes burn-gold {
-            0% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; }
-            100% { text-shadow: 0 0 4px #fff, 0 -5px 10px #ffeb3b, 2px -10px 20px #ff9800; }
-        }
-        @keyframes burn-max {
-            0% { text-shadow: 0 0 5px #fff, 0 -8px 15px #ffd700, 0 -15px 30px #ff4500, 0 -25px 50px #ff0000; transform: scale(1); }
-            50% { text-shadow: 0 0 5px #fff, 0 -12px 20px #ffd700, -5px -20px 40px #ff4500, 0 -30px 60px #ff0000; transform: scale(1.05); }
-            100% { text-shadow: 0 0 5px #fff, 0 -8px 15px #ffd700, 5px -15px 30px #ff4500, 0 -25px 50px #ff0000; transform: scale(1); }
-        }
-        .flame-gold { color: #facc15; animation: burn-gold 1.5s infinite alternate; }
-        .flame-max { color: #fbbf24; animation: burn-max 0.8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
-
         .countdown-item { background: white; padding: 4px 10px; border-radius: 10px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 6px; }
         .mode-indicator { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 14px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
         .mode-guest { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
         .mode-admin { background: #6366f1; color: white; border: 1px solid #4f46e5; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
-
+        .log-timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; }
+        .log-timeline-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; border: 2px solid white; }
+        
+        /* Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #6366f1; cursor: pointer; margin-top: -7px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
+        
+        /* Kayan Yazı */
         #ata-quote-wrapper { position: relative; overflow: hidden; height: 90px; width: 100%; }
         .quote-slide { position: absolute; width: 100%; transition: transform 0.8s, opacity 0.5s; }
         .quote-enter { transform: translateX(100%); opacity: 0; }
         .quote-active { transform: translateX(0); opacity: 1; }
         .quote-exit { transform: translateX(-100%); opacity: 0; }
-        
-        .log-timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #e2e8f0; }
-        .log-timeline-item::before { content: ''; position: absolute; left: -7px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: #6366f1; border: 2px solid white; }
     </style>
 </head>
 <body class="antialiased">
+
+    <div class="split-bg">
+        <div class="bg-nature"></div>
+        <div class="bg-energy"></div>
+    </div>
 
     <div id="admin-panel" class="fixed top-0 right-0 h-full w-96 admin-sidebar translate-x-full overflow-y-auto p-8 border-l border-slate-100">
         <div class="flex justify-between items-center mb-8">
@@ -107,70 +79,64 @@
         </div>
 
         <div class="flex gap-1 mb-8 bg-slate-50 p-1 rounded-2xl">
-            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1">Sayılar</button>
-            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1">Kişiler</button>
-            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1">Görevler</button>
-            <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1">Sözler</button>
+            <button onclick="window.switchSidebarTab('stats')" id="tab-stats" class="tab-btn active flex-1 py-2">Sayılar</button>
+            <button onclick="window.switchSidebarTab('contacts')" id="tab-contacts" class="tab-btn inactive flex-1 py-2">Kişiler</button>
+            <button onclick="window.switchSidebarTab('todos')" id="tab-todos" class="tab-btn inactive flex-1 py-2">Görevler</button>
+            <button onclick="window.switchSidebarTab('quotes')" id="tab-quotes" class="tab-btn inactive flex-1 py-2">Sözler</button>
         </div>
         
         <div id="sidebar-stats-content">
             <div id="editor-list" class="space-y-4 mb-8"></div>
-            <div class="pt-8 border-t border-slate-100 space-y-3">
-                <button onclick="window.addNewCategory()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-bold hover:shadow-lg transition-all">+ Yeni Kategori</button>
-                <button onclick="window.seedDataToCloud()" class="w-full text-slate-400 text-[10px] font-bold uppercase hover:text-indigo-600">Varsayılana Dön</button>
-            </div>
+            <button onclick="window.addNewCategory()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl text-sm font-bold shadow-lg">+ Yeni Kategori</button>
         </div>
 
         <div id="sidebar-contacts-content" class="hidden space-y-5">
-            <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="contact-form-title">Yeni Kayıt</h3><button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold uppercase cursor-pointer">İptal</button></div>
+            <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase" id="contact-form-title">Yeni Kayıt</h3><button onclick="window.resetContactForm()" id="btn-cancel-edit" class="hidden text-rose-500 text-[10px] font-bold">İPTAL</button></div>
             <div class="space-y-4">
                 <input type="hidden" id="contact-edit-id"><input type="text" id="contact-name" placeholder="Ad Soyad" class="custom-input"><select id="contact-type" class="custom-input"></select><input type="email" id="contact-email" placeholder="E-posta" class="custom-input"><input type="tel" id="contact-phone" placeholder="Telefon" class="custom-input">
-                <div class="pt-4 border-t border-slate-100"><label class="text-[10px] font-bold text-slate-400 mb-2 block uppercase">Referans</label><input type="text" id="contact-ref-name" placeholder="Referans İsmi" class="custom-input mb-3"><input type="tel" id="contact-ref-phone" placeholder="Referans Tel" class="custom-input"></div>
+                <div class="pt-4 border-t border-slate-100"><label class="text-[10px] font-bold text-slate-400 mb-2 block">REFERANS</label><input type="text" id="contact-ref-name" placeholder="Referans İsmi" class="custom-input mb-3"><input type="tel" id="contact-ref-phone" placeholder="Referans Tel" class="custom-input"></div>
                 <textarea id="contact-note" placeholder="Notlar..." class="custom-input h-24"></textarea>
-                <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm hover:shadow-lg">KAYDET</button>
+                <button onclick="window.addContactToCloud()" id="btn-save-contact" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg">KAYDET</button>
             </div>
         </div>
 
         <div id="sidebar-todos-content" class="hidden space-y-5">
-            <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase tracking-widest" id="todo-form-title">Yeni Görev</h3><button onclick="window.resetTodoForm()" id="btn-cancel-todo" class="hidden text-rose-500 text-[10px] font-bold uppercase cursor-pointer">İptal</button></div>
+            <div class="flex justify-between items-center"><h3 class="text-indigo-600 text-[10px] font-black uppercase" id="todo-form-title">Yeni Görev</h3><button onclick="window.resetTodoForm()" id="btn-cancel-todo" class="hidden text-rose-500 text-[10px] font-bold">İPTAL</button></div>
             <div class="space-y-4">
-                <input type="hidden" id="todo-edit-id">
-                <input type="text" id="todo-task" placeholder="Görev Başlığı..." class="custom-input">
-                <select id="todo-status" class="custom-input"><option value="Yapılmadı">Yapılmadı</option><option value="Yapıldı">Yapıldı</option><option value="Diğer">Diğer</option></select>
+                <input type="hidden" id="todo-edit-id"><input type="text" id="todo-task" placeholder="Görev Başlığı..." class="custom-input">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex justify-between mb-2"><label class="text-[10px] font-bold text-slate-500 uppercase">Tamamlanma</label><span id="todo-progress-display" class="text-xs font-black text-indigo-600">%0</span></div>
+                    <input type="range" id="todo-progress" min="0" max="100" step="10" value="0" oninput="document.getElementById('todo-progress-display').innerText = '%' + this.value">
+                </div>
                 <textarea id="todo-desc" placeholder="Açıklama / Not..." class="custom-input h-24"></textarea>
-                <button onclick="window.addTodoToCloud()" id="btn-save-todo" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">GÖREVİ KAYDET</button>
+                <button onclick="window.addTodoToCloud()" id="btn-save-todo" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg">GÖREVİ KAYDET</button>
             </div>
         </div>
 
         <div id="sidebar-quotes-content" class="hidden space-y-5">
-            <h3 class="text-indigo-600 text-[10px] font-black uppercase mb-4">Söz Havuzu</h3>
-            <div class="space-y-4"><textarea id="new-quote-text" placeholder="Yeni vecize..." class="custom-input h-24"></textarea><button onclick="window.addQuoteToCloud()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">EKLE</button><div id="quote-manager-list" class="pt-4 space-y-3"></div></div>
+            <textarea id="new-quote-text" placeholder="Yeni vecize..." class="custom-input h-24"></textarea><button onclick="window.addQuoteToCloud()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm">EKLE</button><div id="quote-manager-list" class="pt-4 space-y-3"></div>
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-6 py-12">
-        <header class="flex flex-col md:flex-row justify-between items-start mb-16 gap-8 text-center md:text-left">
+    <div class="max-w-7xl mx-auto px-6 py-12 relative z-10">
+        <header class="flex flex-col md:flex-row justify-between items-start mb-16 gap-8">
             <div class="w-full md:w-auto">
-                <h1 class="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter leading-none m-0 uppercase">İLKER'İN <span class="text-indigo-600 italic">İZLENCESİ</span></h1>
-                <p class="text-slate-400 text-lg mt-3 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
-                
-                <div class="mt-6 flex flex-col gap-6 items-center md:items-start w-full">
-                    <div class="flex flex-wrap gap-3 justify-center md:justify-start items-center">
-                        <div id="mode-status" class="mode-indicator mode-guest shadow-sm"><span id="mode-icon">👤</span> <span id="mode-text">Misafir Modu</span></div>
-                        <button id="btn-login-toggle" onclick="window.handleAuth()" class="text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-700 underline cursor-pointer">Yönetici Girişi</button>
-                        <button onclick="window.toggleAdmin()" id="btn-master-manage" class="hidden-mode bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:shadow-lg cursor-pointer">🛠️ Verileri Yönet</button>
-                    </div>
-                    <div id="ata-quote-container" class="max-w-xl w-full"><div id="ata-quote-wrapper"></div><p id="ata-author" class="text-indigo-500 text-[10px] font-black uppercase tracking-widest mt-2 pl-5">Mustafa Kemal Atatürk</p></div>
+                <h1 class="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter leading-none m-0 uppercase drop-shadow-sm">İLKER'İN <span class="text-indigo-600 italic">İZLENCESİ</span></h1>
+                <p class="text-slate-500 text-lg mt-3 font-semibold">Stratejik İlerleme ve Veri Analizi ✨</p>
+                <div class="mt-6 flex flex-wrap gap-3 items-center">
+                    <div id="mode-status" class="mode-indicator mode-guest shadow-sm"><span id="mode-icon">👤</span> <span id="mode-text">Misafir Modu</span></div>
+                    <button id="btn-login-toggle" onclick="window.handleAuth()" class="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 underline cursor-pointer bg-white/50 px-3 py-1 rounded-lg">Yönetici Girişi</button>
+                    <button onclick="window.toggleAdmin()" id="btn-master-manage" class="hidden-mode bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase hover:shadow-lg cursor-pointer">🛠️ Yönet</button>
                 </div>
+                <div id="ata-quote-container" class="max-w-xl w-full mt-8"><div id="ata-quote-wrapper"></div><p id="ata-author" class="text-indigo-600 text-[10px] font-black uppercase tracking-widest mt-2 pl-5">Mustafa Kemal Atatürk</p></div>
             </div>
-
             <div class="flex flex-col gap-4 min-w-[320px]">
-                <div class="glass-card p-5 rounded-[2rem] flex flex-col gap-2 shadow-sm">
+                <div class="glass-card p-5 rounded-[2rem] shadow-sm">
                     <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-[2px] mb-1 text-center">Akademik Takvim & Geri Sayım</h3>
                     <div id="countdown-list" class="space-y-1.5"></div>
                 </div>
                 <div id="daily-log-input-area" class="hidden-mode glass-card p-6 rounded-[2rem] border-2 border-indigo-200 shadow-lg">
-                    <h3 class="text-[10px] font-black text-indigo-600 uppercase mb-3 flex items-center gap-2">🚀 Bugün tezin için ne yaptın?</h3>
+                    <h3 class="text-[10px] font-black text-indigo-600 uppercase mb-3">🚀 Bugün tezin için ne yaptın?</h3>
                     <textarea id="new-log-text" class="custom-input h-24 text-sm mb-4" placeholder="İlerlemeni buraya not düş..."></textarea>
                     <button onclick="window.saveDailyLog()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-md">GÜNLÜĞE EKLE</button>
                 </div>
@@ -189,28 +155,28 @@
 
         <div class="space-y-24">
             <section>
-                <div class="flex justify-between items-end mb-8 px-4"><h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">📅 İletişim Rehberi</h2></div>
-                <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl">
+                <h2 class="text-3xl font-black text-slate-800 uppercase mb-8 px-4 tracking-tight">📅 İletişim Rehberi</h2>
+                <div class="glass-card rounded-[3rem] overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[1000px]">
-                            <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
+                            <thead class="bg-slate-50/80 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
                                 <tr><th class="px-8 py-6">AD SOYAD</th><th class="px-8 py-6">ROL</th><th class="px-8 py-6">İLETİŞİM</th><th class="px-8 py-6">REFERANS</th><th class="px-8 py-6">NOTLAR</th><th class="px-8 py-6 text-right">EYLEM</th></tr>
                             </thead>
-                            <tbody id="contacts-table-body" class="divide-y divide-slate-50"></tbody>
+                            <tbody id="contacts-table-body" class="divide-y divide-slate-50/50"></tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
             <section>
-                <div class="flex justify-between items-end mb-8 px-4"><h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">✅ Akademik Görevler</h2></div>
-                <div class="glass-card rounded-[3rem] overflow-hidden border-none shadow-xl">
+                <h2 class="text-3xl font-black text-slate-800 uppercase mb-8 px-4 tracking-tight">✅ Akademik Görevler</h2>
+                <div class="glass-card rounded-[3rem] overflow-hidden shadow-xl">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[800px]">
-                            <thead class="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
-                                <tr><th class="px-8 py-6">GÖREV</th><th class="px-8 py-6 w-48">DURUM</th><th class="px-8 py-6">NOT</th><th class="px-8 py-6 text-right">EYLEM</th></tr>
+                            <thead class="bg-slate-50/80 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b border-slate-100">
+                                <tr><th class="px-8 py-6">GÖREV</th><th class="px-8 py-6 w-64">İLERLEME</th><th class="px-8 py-6">NOT</th><th class="px-8 py-6 text-right">EYLEM</th></tr>
                             </thead>
-                            <tbody id="todo-table-body" class="divide-y divide-slate-50"></tbody>
+                            <tbody id="todo-table-body" class="divide-y divide-slate-50/50"></tbody>
                         </table>
                     </div>
                 </div>
@@ -218,9 +184,9 @@
 
             <section id="thesis-journal-section" class="hidden-mode pt-16 pb-32">
                 <div class="flex items-center gap-6 mb-16">
-                    <div class="h-px bg-slate-200 flex-1"></div>
-                    <h2 class="text-2xl font-black text-slate-300 uppercase tracking-[0.4em]">Tez Yolculuğu Günlüğü</h2>
-                    <div class="h-px bg-slate-200 flex-1"></div>
+                    <div class="h-px bg-slate-300 flex-1"></div>
+                    <h2 class="text-2xl font-black text-slate-400 uppercase tracking-[0.4em]">Tez Yolculuğu Günlüğü</h2>
+                    <div class="h-px bg-slate-300 flex-1"></div>
                 </div>
                 <div class="max-w-4xl mx-auto space-y-8" id="daily-logs-display"></div>
             </section>
@@ -256,26 +222,73 @@
             { label: 'Veri Analizi', date: '2026-04-05', emoji: '🔍' }
         ];
 
-        const maskString = (str) => { if (!str) return '-'; return str.split(' ').map(w => w[0] + '*'.repeat(w.length - 1)).join(' '); };
+        // GÜÇLENDİRİLMİŞ MASKELEME (Hata önleyici)
+        const maskString = (str) => {
+            if (!str || typeof str !== 'string') return '-';
+            return str.split(' ').map(w => w.length > 0 ? w[0] + '*'.repeat(w.length - 1) : '').join(' ');
+        };
 
         const startApp = async () => {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
             try { await setPersistence(auth, browserLocalPersistence); await signInAnonymously(auth); } catch(e){}
-            onAuthStateChanged(auth, async (user) => {
-                if (user) { await checkAdminStatus(user.uid); setupListeners(); }
-            });
+            onAuthStateChanged(auth, async (user) => { if (user) { await checkAdminStatus(user.uid); setupListeners(); } });
             renderCountdowns();
         };
 
         const setupListeners = () => {
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'gorusmeler'), s => { stats = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0)); renderDash(); renderStatsEditor(); updateRadar(); updateContactDropdown(); });
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), s => { contacts = s.docs.map(d => ({id:d.id,...d.data()})); renderContacts(); });
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'randevular'), s => { 
+                contacts = s.docs.map(d => ({id:d.id,...d.data()})); 
+                renderContacts(); // Listenin tamamı burada tetiklenir
+            });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar'), s => { todos = s.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>b.createdAt-a.createdAt); renderTodos(); });
             onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'sozler'), s => { quotes = s.docs.map(d => ({id:d.id,...d.data()})); renderQuotesAdmin(); startQuoteRotation(); });
             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'tez_gunlugu'), orderBy('createdAt', 'desc')), s => { renderDailyLogs(s.docs.map(d => ({id:d.id,...d.data()}))); });
         };
+
+        // --- CONTACTS RENDER (HATA AYIKLANDI) ---
+        function renderContacts() {
+            const b = document.getElementById('contacts-table-body');
+            if(!b) return;
+            b.innerHTML = contacts.length === 0 ? '<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">Liste boş...</td></tr>' : '';
+            
+            contacts.forEach(c => {
+                try {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-indigo-50/30 transition-colors border-b border-slate-50 text-sm';
+                    
+                    // Güvenli veri çekme
+                    const rawName = c.name || "";
+                    const rawRef = c.refName || "";
+                    const rawEmail = c.email || "";
+                    const rawPhone = c.phone || "";
+                    const rawRefPhone = c.refPhone || "";
+                    const rawNote = c.note || "";
+
+                    const n = isAdmin ? rawName : maskString(rawName);
+                    const r = isAdmin ? (rawRef || '-') : maskString(rawRef);
+                    const e = isAdmin ? `📧 ${rawEmail || '-'}<br>📞 ${rawPhone || '-'}` : '**********';
+                    const refP = isAdmin ? `📱 ${rawRefPhone || '-'}` : '';
+                    const no = isAdmin ? (rawNote || '-') : '********************';
+
+                    tr.innerHTML = `
+                        <td class="px-8 py-6 font-bold text-slate-800">${n}</td>
+                        <td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">${c.type || '-'}</span></td>
+                        <td class="px-8 py-6 text-slate-500 font-medium">${e}</td>
+                        <td class="px-8 py-6 text-slate-500">👤 ${r}<br><span class="text-xs">${refP}</span></td>
+                        <td class="px-8 py-6 text-xs italic text-slate-400 max-w-[200px] truncate">${no}</td>
+                        <td class="px-8 py-6 text-right">
+                            ${isAdmin ? `<button onclick="window.editContact('${c.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-'}
+                        </td>
+                    `;
+                    b.appendChild(tr);
+                } catch (err) {
+                    console.error("Satır render hatası:", err); // Hatayı konsola yaz, döngüyü kırma
+                }
+            });
+        }
 
         // --- DASHBOARD ---
         function renderDash() {
@@ -287,11 +300,9 @@
             stats.forEach(item => {
                 const perc = item.total > 0 ? Math.round((item.completed/item.total)*100) : 0;
                 tDone += item.completed; tTarget += item.total;
-                
                 let cardClass = 'glass-card', titleColor = 'text-slate-800', barColor = perc === 100 ? 'bg-amber-400' : 'bg-indigo-600';
                 if(perc === 100) { cardClass = 'gold-card'; titleColor = 'text-amber-800'; }
                 else if(item.completed === 0) { cardClass = 'dark-card'; titleColor = 'text-slate-500'; barColor = 'bg-slate-300'; }
-
                 const card = document.createElement('div');
                 card.className = `${cardClass} rounded-[2.5rem] p-8 text-left`;
                 let icons = ''; for(let i=0; i<item.total; i++) icons += `<span class="text-2xl ${i < item.completed ? '' : 'opacity-20 grayscale'}">${item.emoji || '📌'}</span>`;
@@ -301,11 +312,10 @@
             const overall = tTarget > 0 ? Math.round((tDone/tTarget)*100) : 0;
             let percentageClass = 'text-indigo-600', label = 'İLERLİYOR';
             if (overall >= 90) { percentageClass = 'flame-max'; label = 'EFSANE!'; } else if (overall >= 70) { percentageClass = 'flame-gold'; label = 'HARİKA!'; }
-            
             summary.innerHTML = `<div class="glass-card p-6 rounded-[2.5rem] border-l-8 border-indigo-500 text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Başarı</p><p class="text-5xl font-black ${percentageClass} mt-2">%${overall}</p><p class="text-[10px] font-bold opacity-40 mt-1 uppercase">${label}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Biten</p><p class="text-4xl font-black text-slate-800 mt-2">${tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kalan</p><p class="text-4xl font-black text-indigo-600 mt-2">${tTarget-tDone}</p></div><div class="glass-card p-6 rounded-[2.5rem] text-center shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Kategori</p><p class="text-4xl font-black text-slate-800 mt-2">${stats.length}</p></div>`;
         }
 
-        // --- GÖREVLER (RENKLİ + DÜZENLEME) ---
+        // --- GÖREVLER (Slider'lı) ---
         function renderTodos() {
             const b = document.getElementById('todo-table-body');
             if(!b) return;
@@ -314,36 +324,41 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-50 text-sm';
                 
-                // Durum Badge Rengi
-                let badgeClass = 'badge-pending';
-                if(t.status === 'Yapıldı') badgeClass = 'badge-done';
-                else if(t.status === 'Diğer') badgeClass = 'badge-other';
+                const progress = parseInt(t.progress || 0);
+                let barColor = 'bg-rose-500'; // 0-20
+                if(progress > 20) barColor = 'bg-orange-500'; // 30-40
+                if(progress > 40) barColor = 'bg-blue-500';   // 50-60
+                if(progress > 60) barColor = 'bg-emerald-500'; // 70-90
+                if(progress == 100) barColor = 'bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.8)]'; // 100
 
-                const statusHtml = `<span class="status-badge ${badgeClass}">${t.status}</span>`;
-                const descDisp = isAdmin ? (t.desc || '-') : '**********';
-                
-                // Admin İşlemleri
                 const actions = isAdmin ? 
                     `<button onclick="window.editTodo('${t.id}')" class="text-indigo-600 font-bold text-[10px] mr-3">DÜZENLE</button>
                      <button onclick="window.deleteTodo('${t.id}')" class="text-rose-400 font-bold text-[10px]">SİL</button>` : '-';
 
                 tr.innerHTML = `
                     <td class="px-8 py-6 font-bold text-slate-800">${t.task}</td>
-                    <td class="px-8 py-6">${statusHtml}</td>
-                    <td class="px-8 py-6 italic text-slate-500">${descDisp}</td>
+                    <td class="px-8 py-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden shadow-inner">
+                                <div class="h-full ${barColor} transition-all duration-1000" style="width:${progress}%"></div>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-500 w-8 text-right">%${progress}</span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-6 italic text-slate-500 text-xs">${isAdmin?(t.desc||'-'):'**********'}</td>
                     <td class="px-8 py-6 text-right">${actions}</td>
                 `;
                 b.appendChild(tr);
             });
         }
 
-        // --- TODO DÜZENLEME FONKSİYONLARI ---
+        // --- TODO EDIT ---
         window.editTodo = (id) => {
-            const t = todos.find(item => item.id === id);
-            if(!t) return;
+            const t = todos.find(i => i.id === id); if(!t) return;
             document.getElementById('todo-edit-id').value = t.id;
             document.getElementById('todo-task').value = t.task;
-            document.getElementById('todo-status').value = t.status;
+            document.getElementById('todo-progress').value = t.progress || 0;
+            document.getElementById('todo-progress-display').innerText = '%' + (t.progress || 0);
             document.getElementById('todo-desc').value = t.desc || '';
             document.getElementById('todo-form-title').innerText = "Görevi Düzenle";
             document.getElementById('btn-save-todo').innerText = "GÜNCELLE";
@@ -351,93 +366,52 @@
             window.switchSidebarTab('todos');
             if(document.getElementById('admin-panel').classList.contains('translate-x-full')) window.toggleAdmin();
         };
-
         window.resetTodoForm = () => {
             document.getElementById('todo-edit-id').value = '';
             document.getElementById('todo-task').value = '';
-            document.getElementById('todo-status').value = 'Yapılmadı';
+            document.getElementById('todo-progress').value = 0;
+            document.getElementById('todo-progress-display').innerText = '%0';
             document.getElementById('todo-desc').value = '';
             document.getElementById('todo-form-title').innerText = "Yeni Görev";
             document.getElementById('btn-save-todo').innerText = "GÖREVİ KAYDET";
             document.getElementById('btn-cancel-todo').classList.add('hidden');
         };
-
         window.addTodoToCloud = async () => {
             const id = document.getElementById('todo-edit-id').value;
             const task = document.getElementById('todo-task').value;
             if(!task || !isAdmin) return;
-            const data = {
-                task, 
-                status: document.getElementById('todo-status').value, 
-                desc: document.getElementById('todo-desc').value, 
-                createdAt: Date.now()
-            };
-
-            if(id) {
-                // Güncelleme
-                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', id), data);
-            } else {
-                // Yeni Kayıt
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'yapilacaklar', `t-${Date.now()}`), data);
-            }
+            const data = { task, progress: document.getElementById('todo-progress').value, desc: document.getElementById('todo-desc').value, createdAt: Date.now() };
+            if(id) await updateDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',id), data);
+            else await setDoc(doc(db,'artifacts',appId,'public','data','yapilacaklar',`t-${Date.now()}`), data);
             window.resetTodoForm();
         };
 
-        // --- REHBER ---
-        function renderContacts() { 
-            const b=document.getElementById('contacts-table-body'); if(!b)return; 
-            b.innerHTML=contacts.length===0?'<tr><td colspan="6" class="text-center p-8 text-slate-300 italic">Liste boş...</td></tr>':''; 
-            contacts.forEach(c=>{ 
-                const tr=document.createElement('tr'); tr.className='hover:bg-indigo-50/50 text-sm'; 
-                const n=isAdmin?c.name:maskString(c.name); const r=isAdmin?(c.refName||'-'):maskString(c.refName); const nt=isAdmin?(c.note||'-'):'****'; 
-                tr.innerHTML=`<td class="px-8 py-6 font-bold text-slate-800">${n}</td><td class="px-8 py-6"><span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-[10px] font-black">${c.type}</span></td><td class="px-8 py-6 text-slate-500">${isAdmin?`📧 ${c.email||'-'}`:'***'}</td><td class="px-8 py-6 text-slate-500">${r}</td><td class="px-8 py-6 important-note italic">${nt}</td><td class="px-8 py-6 text-right">${isAdmin?`<button onclick="window.editContact('${c.id}')" class="text-indigo-600 font-bold mr-2">DÜZENLE</button><button onclick="window.deleteContact('${c.id}')" class="text-rose-400 font-bold">SİL</button>`:'-'}</td>`; b.appendChild(tr); 
-            }); 
-        }
-
-        // --- AUTH & DİĞER ---
+        // --- AUTH & UI ---
         window.handleAuth = async () => {
-            if (!isAdmin) {
-                if (prompt("Yönetici Şifresi:") === "531") { isAdmin = true; await saveAdminStatus(true); updateUIForMode(); }
-                else alert("Hatalı şifre!");
-            } else {
-                if (confirm("Çıkış yapmak istediğinize emin misiniz?")) { isAdmin = false; await saveAdminStatus(false); updateUIForMode(); }
-            }
+            if (!isAdmin) { if (prompt("Şifre:") === "531") { isAdmin=true; await saveAdminStatus(true); updateUIForMode(); } else alert("Hata"); }
+            else { if (confirm("Çıkış?")) { isAdmin=false; await saveAdminStatus(false); updateUIForMode(); } }
         };
-
-        async function checkAdminStatus(userId) {
-            try { const adminDoc = await getDoc(doc(db, 'artifacts', appId, 'users', userId, 'permissions', 'adminStatus')); if (adminDoc.exists() && adminDoc.data().isAuthorized === true) isAdmin = true; updateUIForMode(); } catch (e) { isAdmin = false; updateUIForMode(); }
-        }
-        async function saveAdminStatus(isAuthorized) { if (!auth.currentUser) return; await setDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'permissions', 'adminStatus'), { isAuthorized, updatedAt: Date.now() }); }
-
+        async function checkAdminStatus(uid) { try { const d=await getDoc(doc(db,'artifacts',appId,'users',uid,'permissions','adminStatus')); if(d.exists()&&d.data().isAuthorized) isAdmin=true; updateUIForMode(); } catch(e){isAdmin=false;updateUIForMode();} }
+        async function saveAdminStatus(s) { if(auth.currentUser) await setDoc(doc(db,'artifacts',appId,'users',auth.currentUser.uid,'permissions','adminStatus'),{isAuthorized:s,updatedAt:Date.now()}); }
         function updateUIForMode() {
-            const status = document.getElementById('mode-status');
-            const dailyArea = document.getElementById('daily-log-input-area');
-            const masterBtn = document.getElementById('btn-master-manage');
-            const hiddenElements = document.querySelectorAll('.hidden-mode');
-            const journalSection = document.getElementById('thesis-journal-section');
-
+            const els = { st: document.getElementById('mode-status'), da: document.getElementById('daily-log-input-area'), mb: document.getElementById('btn-master-manage'), js: document.getElementById('thesis-journal-section'), he: document.querySelectorAll('.hidden-mode') };
             if (isAdmin) {
-                status.className = "mode-indicator mode-admin shadow-md"; document.getElementById('mode-icon').innerText = "🛡️"; document.getElementById('mode-text').innerText = "Yönetici Aktif"; document.getElementById('btn-login-toggle').innerText = "Güvenli Çıkış";
-                dailyArea.classList.remove('hidden-mode');
-                masterBtn.classList.remove('hidden-mode');
-                if(journalSection) journalSection.classList.remove('hidden-mode');
-                hiddenElements.forEach(el => el.classList.remove('hidden-mode'));
-                if(db) onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'tez_gunlugu'), orderBy('createdAt', 'desc')), s => { renderDailyLogs(s.docs.map(d => ({id:d.id,...d.data()}))); });
+                els.st.className="mode-indicator mode-admin shadow-md"; document.getElementById('mode-icon').innerText="🛡️"; document.getElementById('mode-text').innerText="Yönetici"; document.getElementById('btn-login-toggle').innerText="Çıkış";
+                els.da.classList.remove('hidden-mode'); els.mb.classList.remove('hidden-mode'); if(els.js)els.js.classList.remove('hidden-mode'); els.he.forEach(e=>e.classList.remove('hidden-mode'));
+                if(db) onSnapshot(query(collection(db,'artifacts',appId,'public','data','tez_gunlugu'),orderBy('createdAt','desc')),s=>{renderDailyLogs(s.docs.map(d=>({id:d.id,...d.data()})));});
             } else {
-                status.className = "mode-indicator mode-guest shadow-sm"; document.getElementById('mode-icon').innerText = "👤"; document.getElementById('mode-text').innerText = "Misafir Modu"; document.getElementById('btn-login-toggle').innerText = "Yönetici Girişi";
-                dailyArea.classList.add('hidden-mode');
-                masterBtn.classList.add('hidden-mode');
-                if(journalSection) journalSection.classList.add('hidden-mode');
+                els.st.className="mode-indicator mode-guest shadow-sm"; document.getElementById('mode-icon').innerText="👤"; document.getElementById('mode-text').innerText="Misafir"; document.getElementById('btn-login-toggle').innerText="Giriş";
+                els.da.classList.add('hidden-mode'); els.mb.classList.add('hidden-mode'); if(els.js)els.js.classList.add('hidden-mode');
                 renderDailyLogs([]);
             }
             renderContacts(); renderTodos();
         }
 
-        // --- STANDART HELPER & CRUD ---
+        // --- HELPER & CRUD ---
         function renderStatsEditor() { const l=document.getElementById('editor-list'); if(!l)return; l.innerHTML=stats.map(i=>`<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl relative shadow-sm"><button onclick="window.removeCategory('${i.id}')" class="absolute top-2 right-2 text-rose-400 font-bold text-[10px] border-none bg-transparent cursor-pointer">Sil</button><div class="space-y-3 pt-2"><input type="text" value="${i.title}" class="custom-input h-10 text-xs font-bold" onchange="window.updateValue('${i.id}', 'title', this.value)"><div class="grid grid-cols-2 gap-2"><div><label class="text-[8px] font-black text-slate-400 uppercase">Biten</label><input type="number" value="${i.completed}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'completed', this.value)"></div><div><label class="text-[8px] font-black text-slate-400 uppercase">Hedef</label><input type="number" value="${i.total}" class="custom-input h-8 text-center" onchange="window.updateValue('${i.id}', 'total', this.value)"></div></div></div></div>`).join(''); }
         function updateRadar() { const c=document.getElementById('radarChart')?.getContext('2d'); if(!c)return; if(radarChart)radarChart.destroy(); radarChart=new Chart(c,{type:'radar',data:{labels:stats.map(d=>d.title),datasets:[{label:'% Başarı',data:stats.map(d=>d.total>0?(d.completed/d.total)*100:0),backgroundColor:'rgba(99, 102, 241, 0.15)',borderColor:'#6366f1',borderWidth:2}]},options:{plugins:{legend:{display:false}},scales:{r:{suggestedMin:0,suggestedMax:100,ticks:{display:false}}}}}); }
         window.saveDailyLog=async()=>{const t=document.getElementById('new-log-text').value;if(!t||!isAdmin)return;const d=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});await setDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',`log-${Date.now()}`),{text:t,dateDisplay:d,createdAt:Date.now()});document.getElementById('new-log-text').value='';};
-        function renderDailyLogs(logs){const c=document.getElementById('daily-logs-display');if(!c)return;c.innerHTML=logs.length===0?'<p class="text-center text-slate-300 italic font-bold">Henüz not yok...</p>':'';logs.forEach(l=>{const d=document.createElement('div');d.className='glass-card p-6 rounded-[2rem] log-timeline-item shadow-sm';d.innerHTML=`<div class="flex justify-between items-start mb-2"><span class="text-[10px] font-black text-indigo-500 uppercase">${l.dateDisplay}</span>${isAdmin?`<button onclick="window.deleteLog('${l.id}')" class="text-rose-400 font-bold text-[9px]">SİL</button>`:''}</div><p class="text-slate-700 font-semibold text-sm">${l.text}</p>`;c.appendChild(d);});}
+        function renderDailyLogs(logs){const c=document.getElementById('daily-logs-display');if(!c)return;c.innerHTML=logs.length===0?'<p class="text-center text-slate-400 italic font-bold">Henüz not yok...</p>':'';logs.forEach(l=>{const d=document.createElement('div');d.className='glass-card p-6 rounded-[2rem] log-timeline-item shadow-sm';d.innerHTML=`<div class="flex justify-between items-start mb-2"><span class="text-[10px] font-black text-indigo-500 uppercase">${l.dateDisplay}</span>${isAdmin?`<button onclick="window.deleteLog('${l.id}')" class="text-rose-400 font-bold text-[9px]">SİL</button>`:''}</div><p class="text-slate-700 font-semibold text-sm">${l.text}</p>`;c.appendChild(d);});}
         window.deleteLog=async(id)=>isAdmin&&confirm('Sil?')&&await deleteDoc(doc(db,'artifacts',appId,'public','data','tez_gunlugu',id));
         window.updateValue=async(id,f,v)=>isAdmin&&await updateDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',id),{[f]:(f==='completed'||f==='total')?parseInt(v)||0:v});
         window.addNewCategory=async()=>isAdmin&&await setDoc(doc(db,'artifacts',appId,'public','data','gorusmeler',`cat-${Date.now()}`),{title:'Yeni',completed:0,total:5,emoji:'📌',order:stats.length+1});
